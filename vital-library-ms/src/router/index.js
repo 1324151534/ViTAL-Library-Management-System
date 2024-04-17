@@ -3,7 +3,11 @@ import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router
 const routes = [
     {
         path: "/",
-        alias: [ '/home', "/index"],
+        component: () => import("@/pages/login.vue"),
+    },
+    {
+        path: "/index",
+        alias: [ '/home'],
         component: () => import("@/pages/index.vue"),
     },
     {
