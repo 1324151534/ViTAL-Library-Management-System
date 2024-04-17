@@ -3,7 +3,7 @@
 
 <template>
     <div class="topbar">
-        <div class="topbar-home"><router-link to="/">Home</router-link></div>
+        <div class="topbar-home"><router-link to="/index">Home</router-link></div>
         <div class="topbar-search"><router-link to="/search">Search</router-link></div>
         <div class="topbar-Notification"><router-link to="/notification">Notification</router-link></div>
         <div class="topbar-borrow"><router-link to="borrow">Borrow</router-link></div>

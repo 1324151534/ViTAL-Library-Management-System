@@ -1,10 +1,25 @@
 <script setup>
 import VFonts from "@/components/VFonts.vue";
+import { ref } from "vue";
+
+const searchQuery = ref("");
+const emit = defineEmits(['search']);
+
+const handleSearch = () => {
+    if (searchQuery.value.trim() !== "") {
+        emit('search', searchQuery.value.trim());
+    }
+    else {
+        alert('Please input something!');
+    }
+};
 </script>
 
 <template>
-    <div class="SearchBar-box"><input type="text" placeholder="Search The Book You Want"><button
-            type="submit" class="search-button">Search</button></div>
+    <div class="SearchBar-box">
+        <input type="text" placeholder="Search The Book You Want" v-model="searchQuery">
+        <button type="submit" class="search-button" @click="handleSearch">Search</button>
+    </div>
 </template>
 
 <style>
