@@ -1,0 +1,173 @@
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    background-color: black;
+    overflow: hidden;
+    color: white;
+}
+
+.ln-bkg-darker {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    z-index: 1;
+    object-fit: cover;
+    transition-duration: 0.2s;
+}
+
+.ln-bkg-darker::before {
+    position: absolute;
+    font-size: 1.5vw;
+    font-weight: lighter;
+    z-index: 999;
+    content: "Powered by Microsoft Bing";
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    opacity: 0;
+    transition-duration: 0.2s;
+    margin-left: 5vh;
+    bottom: 5vh;
+}
+
+.ln-bkg-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    transition-duration: 0.2s;
+}
+
+.ln-box {
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.ln-box-float {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.ln-box-ipt {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.ln-title {
+    font-size: 5vh;
+    text-wrap: nowrap;
+    font-family: apex-bold;
+}
+
+.ln-title-ver {
+    font-size: 2vh;
+    text-wrap: nowrap;
+    margin-bottom: 10px;
+    font-family: apex-light;
+    opacity: 0.6;
+}
+
+.ln-ipt {
+    width: 80%;
+    color: white;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    height: 40px;
+    border-radius: 200px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+    transition-duration: 0.2s;
+    outline: none;
+    border: 1px solid rgb(195, 195, 195);
+    background-color: rgba(255, 255, 255, 0.205);
+}
+
+.ln-ipt::placeholder {
+    font-family: apex;
+    color: rgb(195, 195, 195);
+}
+
+.ln-ipt:hover {
+    background-color: rgba(215, 215, 215, 0.5);
+}
+
+.ln-ipt:focus {
+    background-color: rgb(230, 230, 230, 0.1);
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.ln-box-btns {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ln-red {
+    color: rgb(228, 68, 68);
+}
+
+.ln-regu {
+    font-family: apex;
+}
+
+.ln-btns {
+    cursor: pointer;
+    width: 100%;
+    height: 30px;
+    margin-top: 10px;
+    background: none;
+    border: none;
+    outline: none;
+    transition-duration: 0.4s;
+    font-size: 2vh;
+    font-family: apex;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.ln-reg::before {
+    content: "SIGNUP";
+    transition: margin-left 0.4s;
+}
+
+.ln-log::before {
+    content: "LOGIN";
+    transition: margin-left 0.4s;
+}
+
+.ln-btns:hover:before {
+    margin-left: calc(100% - 70px);
+}
+
+.ln-btns:hover {
+    background-color: rgb(228, 68, 68);
+    color: white;
+}
+
+.ln-btns:active {
+    transition-duration: 0s;
+    background-color: rgb(164, 48, 48);
+}
+
+.ln-noti {
+    font-family: apex-light;
+}
