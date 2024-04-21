@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-
+import VTopBar from '@/components/VTopBar.vue';
 // 创建响应式变量
 const book = {};
 const bookId = 0;
@@ -32,6 +32,8 @@ const fetchBookDetail = async () => {
         document.getElementById('id').innerHTML = book.value.id;
         document.getElementById('title').innerHTML = book.value.title;
         document.getElementById('author').innerHTML = book.value.author;
+        document.getElementById('available').innerHTML = book.value.available;
+        document.getElementById('ISBN').innerHTML = book.value.isbn;
     } catch (error) {
         console.error('Error fetching book details:', error);
     }
@@ -39,17 +41,107 @@ const fetchBookDetail = async () => {
 </script>
 
 <template>
+    <VTopBar></VTopBar>
+    <div class="col-title">Book Detailed Page</div>
     <div class="book-detailed">
-        <h1>书籍详情页</h1>
-        <p>书籍 ID: <div id="id"></div></p>
+        <div class="col-line">Book ID: <div class="col-value" id="id"></div></div>
 
-        <p>书籍名称: <div id="title"></div></p>
-        <p>作者: <div id="author"></div></p>
+        <div class="col-line">Book Name: <div class="col-value" id="title"></div></div>
+        <div class="col-line">Author: <div class="col-value" id="author"></div></div>
+        <div class="col-line">Available: <div class="col-value" id="available"></div></div>
+        <div class="col-line">ISBN: <div class="col-value" id="ISBN"></div></div>
+    </div>
+    <div class="btns-box">
+        <button class="bd-btn">Borrow</button>
+        <button class="bd-btn">Reserve</button>
     </div>
 </template>
 
 <style>
+body{
+    margin: 0;
+    padding: 0;
+    background-color: rgb(50, 50, 50);
+}
 .book-detailed{
     color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    border: 1px solid white;
+    border-radius: 10px;
+    width: 60%;
+    min-width: 400px;
+    max-width: 600px;
+    margin: auto;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.col-title {
+    font-size: 40px;
+    font-family: apex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    width: 100%;
+    color: white;
+}
+
+.col-line {
+    display: flex;
+    font-weight: bolder;
+    height: 50px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    font-size: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.col-value {
+    font-weight: lighter;
+    margin-left: 5px;
+    text-align: end;
+    width: 300px;
+}
+
+.btns-box {
+    width: 60%;
+    min-width: 400px;
+    max-width: 600px;
+    margin: auto;
+    margin-top: 40px;
+    height: 50px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.bd-btn {
+    outline: none;
+    border: none;
+    box-sizing: border-box;
+    height: 50px;
+    width: calc(50% - 5px);
+    font-size: 30px;
+    font-family: apex;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition-duration: 0.2s;
+    color: white;
+}
+
+.bd-btn:hover {
+    background-color: rgb(228, 68, 68);
+}
+
+.bd-btn:active {
+    transition-duration: 0s;
+    background-color: rgba(228, 68, 68, 0.5);
 }
 </style>
