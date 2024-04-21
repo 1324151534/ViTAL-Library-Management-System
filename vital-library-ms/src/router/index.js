@@ -11,9 +11,28 @@ const routes = [
         component: () => import("@/pages/user/login-user.vue"),
     },
     {
-        path: "/index",
-        alias: [ '/home'],
+        path: "/index-user",
         component: () => import("@/pages/user/index-user.vue"),
+    },
+    {
+        path: "/index-admin",
+        component: () => import("@/pages/admin/index-user.vue"),
+    },
+    {
+        path: "/book-manage",
+        component: () => import("@/pages/admin/book-manage.vue"),
+    },
+    {
+        path: "/book-manage-modify",
+        component: () => import("@/pages/admin/book-manage-modify.vue"),
+    },
+    {
+        path: "/user-manage",
+        component: () => import("@/pages/admin/user-manage.vue"),
+    },
+    {
+        path: "/user-manage-modify",
+        component: () => import("@/pages/admin/user-manage-modify.vue"),
     },
     {
         path: "/search",

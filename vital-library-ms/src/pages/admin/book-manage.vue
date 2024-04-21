@@ -1,28 +1,7 @@
 <script setup>
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
-import VAdminRecBox from '@/components/VAdminRecBox.vue';
-import VSearchBar from "@/components/VSearchBar.vue";
+import VBookListContainer from '@/components/VBookListContainer.vue';
 import VFonts from "@/components/VFonts.vue";
-import axios from "axios";
-import { ref } from "vue";
-
-const searchResults = ref([]);
-
-const showResults = ref(false);
-
-const searchBooks = async (query) => {
-    searchResults.value = [];
-    try {
-        const response = await axios.get(`http://localhost:3000/books?q=${query}`);
-        // 确保 response.data 是一个数组，即使它是空的
-        searchResults.value = Array.isArray(response.data) ? response.data : [];
-        showResults.value = true; // 无论 searchResults 是否为空，都显示结果区域
-    } catch (error) {
-        console.error('Error searching books:', error);
-        searchResults.value = [];
-        showResults.value = true;
-    }
-};
 
 </script>
 
@@ -30,20 +9,30 @@ const searchBooks = async (query) => {
     <VTopAdminBar></VTopAdminBar>
     <div class="empty200px" style="height: 100px; width: 100%;"></div>
     <div class="title-box">
-        <h1>Welcome, <span class="title-usrnme">$USERNAME$</span> !</h1>
+        <h1>BOOK <span class="title-usrnme">MANAGEMENT</span> User Interface</h1>
     </div>
-    <div class="admin-rec-container">
-        <VAdminRecBox></VAdminRecBox>
-        <VAdminRecBox></VAdminRecBox>
-        <VAdminRecBox></VAdminRecBox>
-    </div>
+    <div class="list-title">Book List</div>
+    <VBookListContainer></VBookListContainer>
 </template>
 
 <style>
+a {
+    text-decoration: none;
+}
+
 body {
     padding: 0;
     margin: 0;
     background-color: rgb(50, 50, 50);
+}
+
+.list-title {
+    width: 100%;
+    height: 50px;
+    color: white;
+    text-align: center;
+    font-size: 30px;
+    font-family: apex;
 }
 
 .admin-rec-container {
