@@ -6,7 +6,7 @@ import VFonts from "@/components/VFonts.vue";
 <template>
     <VTopBar></VTopBar>
     <div class="title-box">
-        <h1>Notification Page</h1>
+        <h1>Borrow Page</h1>
     </div>
 </template>
 
@@ -33,5 +33,12 @@ body {
     width: 100%;
     height: 200px;
     font-family: "MiSans"
+}
+
+@font-face {
+    font-family: "MiSans";
+    src: url('@/assets/fonts/MiSans/MiSans-Normal.ttf');
+    font-weight: normal;
+    font-style: normal;
 }
 </style>

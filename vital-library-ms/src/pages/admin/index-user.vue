@@ -1,6 +1,6 @@
 <script setup>
 import VTopBar from '@/components/VTopBar.vue';
-import VSearchBar from '@/components/VSearchBar.vue';
+import VSearchBar from "@/components/VSearchBar.vue";
 import VFonts from "@/components/VFonts.vue";
 import axios from "axios";
 import { ref } from "vue";
@@ -22,12 +22,13 @@ const searchBooks = async (query) => {
         showResults.value = true;
     }
 };
+
 </script>
 
 <template>
     <VTopBar></VTopBar>
     <div class="title-box">
-        <h1>Search The book</h1>
+        <h1>ViTAL Library Management System</h1>
     </div>
     <VSearchBar @search="searchBooks"></VSearchBar>
     <div v-if="showResults" class="result-box">
@@ -52,5 +53,21 @@ body {
     width: 100%;
     height: 200px;
     font-family: "MiSans"
+}
+
+.result-box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 200px;
+    font-family: "MiSans"
+}
+
+@font-face {
+    font-family: "MiSans";
+    src: url('@/assets/fonts/MiSans/MiSans-Normal.ttf');
+    font-weight: normal;
+    font-style: normal;
 }
 </style>

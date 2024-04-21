@@ -6,8 +6,9 @@
         <div class="topbar-home"><router-link to="/index">Home</router-link></div>
         <div class="topbar-search"><router-link to="/search">Search</router-link></div>
         <div class="topbar-Notification"><router-link to="/notification">Notification</router-link></div>
-        <div class="topbar-borrow"><router-link to="borrow">Borrow</router-link></div>
-        <div class="topbar-return"><router-link to="return">Return</router-link></div>
+        <div class="topbar-borrow"><router-link to="/borrow">Borrow</router-link></div>
+        <div class="topbar-return"><router-link to="/return">Return</router-link></div>
+        <div class="topbar-logout"><router-link to="/logout">Logout</router-link></div>
     </div>
     <div class="empty200"></div>
 </template>

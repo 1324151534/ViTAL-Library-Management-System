@@ -5,31 +5,41 @@ const routes = [
         path: "/",
         component: () => import("@/pages/login.vue"),
     },
+    // for Normal Users
+    {
+        path: "/login-user",
+        component: () => import("@/pages/user/login-user.vue"),
+    },
     {
         path: "/index",
         alias: [ '/home'],
-        component: () => import("@/pages/index.vue"),
+        component: () => import("@/pages/user/index-user.vue"),
     },
     {
         path: "/search",
-        component: () => import("@/pages/search.vue"),
+        component: () => import("@/pages/user/search.vue"),
     },
     {
         path: "/notification",
-        component: () => import("@/pages/notification.vue"),
+        component: () => import("@/pages/user/notification.vue"),
     },
     {
         path: "/borrow",
-        component: () => import("@/pages/borrow.vue"),
+        component: () => import("@/pages/user/borrow.vue"),
     },
     {
         path: "/return",
-        component: () => import("@/pages/return.vue"),
+        component: () => import("@/pages/user/return.vue"),
     },
     {
         path: "/user/:id/name/:name?",
         name: "member",
         component: () => import("@/pages/user.vue")
+    },
+    // for admin
+    {
+        path: "/login-admin",
+        component: () => import("@/pages/admin/login-admin.vue")
     }
     // ... 其他路由配置
 ];

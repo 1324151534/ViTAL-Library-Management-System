@@ -9,11 +9,22 @@ import VFonts from '@/components/VFonts.vue';
     <div class="loginPart">
         <h2>User Login</h2>
         <div class="form">
-            <div style="color: white; text-align: center; margin: 20px">
-                <router-link to="/login-admin"><label>Admin Login</label></router-link>
+            <div class="inputElement">
+                <label>Username: </label><input v-model="username" placeholder="Input Username" type="text"></input>
             </div>
-            <div style="color: white; text-align: center; margin: 20px">
-                <router-link to="/login-user"><label>User Login</label></router-link>
+            <div class="inputElement">
+                <label>Password: </label><input v-model="password" placeholder="Input Password" type="password"></input>
+            </div>
+            <div>
+                <router-link to="/index"><button class="login-button">Login</button></router-link>
+            </div>
+            <div style="display: inline;">
+                <div style="text-align: left;color: white;">
+                    <router-link to="/">Go back</router-link>
+                </div>
+                <div style="text-align: right;color: white;">
+                    <router-link class="registerBtn" to="">Have no account?</router-link>
+                </div>
             </div>
         </div>
     </div>
