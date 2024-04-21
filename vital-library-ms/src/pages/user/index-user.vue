@@ -10,20 +10,6 @@ const searchResults = ref([]);
 
 const showResults = ref(false);
 
-// const searchBooks = async (query) => {
-//     searchResults.value = [];
-//     try {
-//         const response = await axios.get(`http://localhost:3000/books?q=${query}`);
-//         // 确保 response.data 是一个数组，即使它是空的
-//         searchResults.value = Array.isArray(response.data) ? response.data : [];
-//         showResults.value = true; // 无论 searchResults 是否为空，都显示结果区域
-//     } catch (error) {
-//         console.error('Error searching books:', error);
-//         searchResults.value = [];
-//         showResults.value = true;
-//     }
-// };
-
 // fetch data from the server
 const searchBooks = async (query) => {
     searchResults.value = [];
@@ -61,13 +47,11 @@ const searchBooks = async (query) => {
         <div class="title-sub">Library Management System</div>
     </div>
     <VSearchBar @search="searchBooks"></VSearchBar>
-    <VRecommandContainer></VRecommandContainer>
-    <div v-if="showResults" class="result-box">
-        <ul v-if="searchResults.length">
-            <li v-for="book in searchResults" :key="book.id">{{ book.title }}</li>
-            <p>Pretend this is a book list</p>
-        </ul>
-        <p class="search-result" v-else>No results found.</p>
+    <div v-if="showResults">
+        <VRecommandContainer :searchResults="searchResults"></VRecommandContainer>
+    </div>
+    <div v-else>
+        <VRecommandContainer></VRecommandContainer>
     </div>
 </template>
 

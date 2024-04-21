@@ -26,7 +26,21 @@ class Book(db.Model):
 # API路由
 @app.route('/books', methods=['GET'])
 def get_books():
-    books = Book.query.all()
+    # 获取请求中的查询参数
+    query = request.args.get('q', '')
+
+    # 在数据库中查找匹配的书籍
+    books = Book.query.filter(
+        (db.func.lower(Book.title).like(f'%{query}%')) |
+        (db.func.lower(Book.author).like(f'%{query}%')) |
+        (db.func.lower(Book.isbn).like(f'%{query}%')) |
+        (db.func.lower(Book.publisher).like(f'%{query}%')) |
+        (db.func.lower(Book.genre).like(f'%{query}%')) |
+        (db.func.lower(Book.description).like(f'%{query}%')) |
+        (db.func.lower(Book.language).like(f'%{query}%'))
+    ).all()
+
+    # 返回匹配的书籍
     return jsonify([{'id': book.id, 'title': book.title, 'author': book.author, 'isbn': book.isbn} for book in books])
 
 @app.route('/books/<int:book_id>', methods=['GET'])

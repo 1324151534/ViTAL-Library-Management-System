@@ -15,20 +15,10 @@ const routes = [
         component: () => import("@/pages/user/index-user.vue"),
     },
     {
-        path: "/search",
-        component: () => import("@/pages/user/search.vue"),
-    },
-    {
-        path: "/notification",
-        component: () => import("@/pages/user/notification.vue"),
-    },
-    {
-        path: "/borrow",
-        component: () => import("@/pages/user/borrow.vue"),
-    },
-    {
-        path: "/return",
-        component: () => import("@/pages/user/return.vue"),
+        path: "/book/:id",
+        name: "bookDetail",
+        component: () => import("@/pages/user/bookDetailed.vue"),
+        props: true,
     },
     {
         path: "/user/:id/name/:name?",
