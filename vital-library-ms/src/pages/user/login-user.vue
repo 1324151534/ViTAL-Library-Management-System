@@ -16,7 +16,7 @@ import VFonts from '@/components/VFonts.vue';
                 <label>Password: </label><input v-model="password" placeholder="Input Password" type="password"></input>
             </div>
             <div>
-                <router-link to="/index"><button class="login-button">Login</button></router-link>
+                <router-link to="/index-user"><button class="login-button">Login</button></router-link>
             </div>
             <div style="display: inline;">
                 <div style="text-align: left;color: white;">

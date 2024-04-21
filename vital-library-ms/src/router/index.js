@@ -11,8 +11,7 @@ const routes = [
         component: () => import("@/pages/user/login-user.vue"),
     },
     {
-        path: "/index",
-        alias: [ '/home'],
+        path: "/index-user",
         component: () => import("@/pages/user/index-user.vue"),
     },
     {
