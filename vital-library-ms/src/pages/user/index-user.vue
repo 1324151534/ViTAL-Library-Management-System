@@ -2,6 +2,7 @@
 import VTopBar from '@/components/VTopBar.vue';
 import VSearchBar from "@/components/VSearchBar.vue";
 import VFonts from "@/components/VFonts.vue";
+import VRecommandContainer from '@/components/VRecommandContainer.vue';
 import axios from "axios";
 import { ref } from "vue";
 
@@ -28,9 +29,11 @@ const searchBooks = async (query) => {
 <template>
     <VTopBar></VTopBar>
     <div class="title-box">
-        <h1>ViTAL Library Management System</h1>
+        <div class="title">V<span class="tit-red">i</span>TAL</div>
+        <div class="title-sub">Library Management System</div>
     </div>
     <VSearchBar @search="searchBooks"></VSearchBar>
+    <VRecommandContainer></VRecommandContainer>
     <div v-if="showResults" class="result-box">
         <ul v-if="searchResults.length">
             <li v-for="book in searchResults" :key="book.id">{{ book.title }}</li>
@@ -44,15 +47,28 @@ const searchBooks = async (query) => {
 body {
     padding: 0;
     margin: 0;
+    background-color: rgb(50, 50, 50);
 }
 
 .title-box {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 200px;
-    font-family: "MiSans"
+    font-family: apex-bold;
+    font-size: 80px;
+    color: white;
+}
+
+.tit-red {
+    color: rgb(228, 68, 68);
+}
+
+.title-sub {
+    font-size: 20px;
+    font-family: apex-light;
 }
 
 .result-box{

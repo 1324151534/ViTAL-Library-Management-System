@@ -1,6 +1,7 @@
 <script setup>
 import VTopBar from '@/components/VTopBar.vue';
 import VFonts from "@/components/VFonts.vue";
+import VGeneralCSS from '@/components/VGeneralCSS.vue';
 </script>
 
 <template>
