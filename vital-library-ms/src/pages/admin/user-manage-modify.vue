@@ -1,49 +1,75 @@
 <script setup>
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
-import VAdminRecBox from '@/components/VAdminRecBox.vue';
-import VSearchBar from "@/components/VSearchBar.vue";
+import VInput from '@/components/VInput.vue';
 import VFonts from "@/components/VFonts.vue";
-import axios from "axios";
-import { ref } from "vue";
-
-const searchResults = ref([]);
-
-const showResults = ref(false);
-
-const searchBooks = async (query) => {
-    searchResults.value = [];
-    try {
-        const response = await axios.get(`http://localhost:3000/books?q=${query}`);
-        // 确保 response.data 是一个数组，即使它是空的
-        searchResults.value = Array.isArray(response.data) ? response.data : [];
-        showResults.value = true; // 无论 searchResults 是否为空，都显示结果区域
-    } catch (error) {
-        console.error('Error searching books:', error);
-        searchResults.value = [];
-        showResults.value = true;
-    }
-};
 
 </script>
 
 <template>
     <VTopAdminBar></VTopAdminBar>
     <div class="empty200px" style="height: 100px; width: 100%;"></div>
-    <div class="title-box">
-        <h1>Welcome, <span class="title-usrnme">$USERNAME$</span> !</h1>
-    </div>
-    <div class="admin-rec-container">
-        <VAdminRecBox></VAdminRecBox>
-        <VAdminRecBox></VAdminRecBox>
-        <VAdminRecBox></VAdminRecBox>
+    <div class="list-title-modify">Modify USER Name <span class="list-title-red">$USERNAME$</span></div>
+    <VInput>User Name</VInput>
+    <VInput>User Password</VInput>
+    <div class="mod-btns">
+        <button class="summit-btn">Summit</button>
     </div>
 </template>
 
 <style>
+a {
+    text-decoration: none;
+}
+
 body {
     padding: 0;
     margin: 0;
     background-color: rgb(50, 50, 50);
+}
+
+.mod-btns {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.summit-btn {
+    width: 250px;
+    height: 50px;
+    font-size: 20px;
+    font-family: apex;
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 200px;
+    transition-duration: 0.2s;
+}
+
+.summit-btn:hover {
+    background-color: rgb(228, 68, 68);
+}
+
+.summit-btn:active {
+    background-color: rgba(228, 68, 68, 0.5);
+}
+
+.list-title-modify {
+    width: 100%;
+    height: 50px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    color: white;
+    text-align: center;
+    font-size: 30px;
+    font-family: apex;
+}
+
+.list-title-red {
+    color: rgb(228, 68, 68);
 }
 
 .admin-rec-container {

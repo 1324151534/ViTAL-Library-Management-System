@@ -29,7 +29,27 @@ const routes = [
     {
         path: "/login-admin",
         component: () => import("@/pages/admin/login-admin.vue")
-    }
+    },
+    {
+        path: "/index-admin",
+        component: () => import("@/pages/admin/index-admin.vue"),
+    },
+    {
+        path: "/book-manage",
+        component: () => import("@/pages/admin/book-manage.vue"),
+    },
+    {
+        path: "/book-manage-modify",
+        component: () => import("@/pages/admin/book-manage-modify.vue"),
+    },
+    {
+        path: "/user-manage",
+        component: () => import("@/pages/admin/user-manage.vue"),
+    },
+    {
+        path: "/user-manage-modify",
+        component: () => import("@/pages/admin/user-manage-modify.vue"),
+    },
     // ... 其他路由配置
 ];
 
