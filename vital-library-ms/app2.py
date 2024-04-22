@@ -110,6 +110,16 @@ def borrow_book(book_id):
     db.session.commit()
     return jsonify({'message': 'Book borrowed successfully'}), 200
 
+@app.route('/books/<int:book_id>/return', methods=['PUT'])
+def return_book(book_id):
+    book = Book.query.get(book_id)
+    if book.available:
+        return jsonify({'error': 'Book is not available for returning'}), 400
+    # 将书籍的 available 状态改为 True
+    book.available = True
+    db.session.commit()
+    return jsonify({'message': 'Book returned successfully'}), 200
+
 @app.route('/')
 def welcome():
     return jsonify({'message': 'Welcome to the Book Management System!'}), 200

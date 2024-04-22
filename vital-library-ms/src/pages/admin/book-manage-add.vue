@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
 import VInput from '@/components/VInput.vue';
 import VFonts from "@/components/VFonts.vue";
@@ -18,29 +18,47 @@ const goBack = () => {
     router.go(-1);
 }
 
-const updateBook = () => {
-    fetch(`http://localhost:5000/books/${id}`, {
-        method: 'PUT',
+const addBook = () => {
+    // 检查所有字段是否为空
+    if (!book.value.title || !book.value.author || !book.value.isbn) {
+        alert('Please fill in all fields!');
+        return;
+    }
+    fetch(`http://localhost:5000/books`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(book.value), // 发送书本信息的 JSON 数据
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        alert('Book updated successfully');
-        // 重新获取信息
-        fetchBookDetail();
-    })
-    .catch(error => {
-        console.error('Error updating book:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            alert('Book add successfully');
+            goBack();
+        })
+        .catch(error => {
+            console.error('Error updating book:', error);
+        });
 
 };
 
-function showBook(){
+const available = computed({
+    get() {
+        return book.value.available === 'true';
+    },
+    set(newValue) {
+        book.value.available = newValue ? 'true' : 'false';
+    }
+});
+
+const updateAvailable = (event) => {
+    book.available = event.target.checked;
+};
+
+function showBook() {
     alert(JSON.stringify(book));
 }
 
@@ -86,7 +104,8 @@ const fetchBookDetail = async () => {
     <div class="input-box">
         <div class="input-text">
             Available:
-            <input type="text" class="vinput" v-model="book.available">
+            <input type="checkbox" class="vinput" @change="updateAvailable($event)" v-model="book.available">
+            {{ book.available }}
         </div>
     </div>
 
@@ -133,7 +152,7 @@ const fetchBookDetail = async () => {
     </div>
 
     <div class="mod-btns">
-        <button id="smt-btn" class="summit-btn" @click="updateBook">Summit</button>
+        <button id="smt-btn" class="summit-btn" @click="addBook">Summit</button>
     </div>
 </template>
 
@@ -238,7 +257,7 @@ body {
     font-family: apex;
 }
 
-.result-box{
+.result-box {
     display: flex;
     align-items: center;
     justify-content: center;

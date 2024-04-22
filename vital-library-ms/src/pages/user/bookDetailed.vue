@@ -1,14 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted} from 'vue';
+import { useRouter } from 'vue-router';
 import VTopBar from '@/components/VTopBar.vue';
 
 const book = {};
 const url = window.location.href;
 const id = url.split('/')[url.split('/').length - 1];
+const router = useRouter();
 
 onMounted(() => {
     fetchBookDetail();
 });
+
+const goBack = () => {
+    router.go(-1);
+}
 
 const fetchBookDetail = async () => {
     try {
@@ -56,11 +62,43 @@ const borrowBook = async () => {
         }
 
         book.value.available = false;
+        alert("Borrowed Book!")
         await fetchBookDetail();
     } catch (error) {
         console.error('Error borrowing book:', error);
     }
 };
+
+const returnBook = async () => {
+    try {
+        if (book.value.available) {
+            alert('Return your mother return.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:5000/books/${id}/return`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        book.value.available = true;
+        alert("Returned Book!");
+        await fetchBookDetail();
+    } catch (error) {
+        console.error('Error returning book:', error);
+    }
+};
+
+const reserveBook = async () => {
+    alert ("This function is not completed in this version.\nConnect with the developer to get your !!!fucking!!! help.")
+}
 </script>
 
 <template>
@@ -74,14 +112,16 @@ const borrowBook = async () => {
         </div>
         <div class="col-line">Author: <div class="col-value" id="author"></div>
         </div>
-        <div class="col-line">Available: <div class="col-value" id="available"></div>
+        <div class="col-line">Available: <div style="color: red; font-weight: bolder;" class="col-value" id="available"></div>
         </div>
         <div class="col-line">ISBN: <div class="col-value" id="ISBN"></div>
         </div>
     </div>
     <div class="btns-box">
         <button class="bd-btn" @click="borrowBook">Borrow</button>
-        <button class="bd-btn">Reserve</button>
+        <button class="bd-btn" @click="reserveBook">Reserve</button>
+        <button class="bd-btn" @click="returnBook">Return</button>
+        <button class="bd-btn" @click="goBack">GoBack</button>
     </div>
 </template>
 
@@ -156,8 +196,8 @@ body {
     border: none;
     box-sizing: border-box;
     height: 50px;
-    width: calc(50% - 5px);
-    font-size: 30px;
+    width: calc(25% - 5px);
+    font-size: 25px;
     font-family: apex;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0.2);

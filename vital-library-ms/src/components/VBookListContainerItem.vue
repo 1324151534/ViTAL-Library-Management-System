@@ -9,6 +9,28 @@ const props = defineProps({
     }
 });
 
+const deleteBook = async () => {
+    try {
+        const response = await fetch(`http://localhost:5000/books/${props.bookId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // 提示删除成功
+        alert('Book deleted successfully');
+        // 刷新页面
+        window.location.reload();
+    } catch (error) {
+        console.error('Error deleting book:', error);
+    }
+};
+
 </script>
 
 <template>
@@ -20,7 +42,7 @@ const props = defineProps({
             <router-link :to="{ name: 'bookManageModify', params: { id: bookId } }">
                 <div class="usr-ctrl-btn"><i class="icon-edit_off"></i> Modify</div>
             </router-link>
-            <div class="usr-ctrl-btn"><i class="icon-delete_forever"></i> Delete</div>
+            <div class="usr-ctrl-btn" @click="deleteBook"><i class="icon-delete_forever"></i> Delete</div>
         </div>
     </div>
 </template>
