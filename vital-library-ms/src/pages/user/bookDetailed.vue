@@ -1,20 +1,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import VTopBar from '@/components/VTopBar.vue';
-// 创建响应式变量
-const book = {};
-const bookId = 0;
 
+const book = {};
 const url = window.location.href;
-// 组件加载后调用 fetchBookDetail 函数
 const id = url.split('/')[url.split('/').length - 1];
+
 onMounted(() => {
     fetchBookDetail();
 });
 
-// 异步获取书籍详情信息
 const fetchBookDetail = async () => {
-    // 从路由参数中获取书籍 ID
     try {
         const response = await fetch(`http://localhost:5000/books/${id}`, {
             method: 'GET',
@@ -28,14 +24,41 @@ const fetchBookDetail = async () => {
         }
 
         const data = await response.json();
-        book.value = data; // 更新 book 变量的值
+        book.value = data;
         document.getElementById('id').innerHTML = book.value.id;
         document.getElementById('title').innerHTML = book.value.title;
         document.getElementById('author').innerHTML = book.value.author;
         document.getElementById('available').innerHTML = book.value.available;
         document.getElementById('ISBN').innerHTML = book.value.isbn;
+        console.log(book);
     } catch (error) {
         console.error('Error fetching book details:', error);
+    }
+};
+
+const borrowBook = async () => {
+    try {
+        if (!book.value.available) {
+            alert('This book is not available for borrowing.');
+            return;
+        }
+
+        const response = await fetch(`http://localhost:5000/books/${id}/borrow`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        book.value.available = false;
+        await fetchBookDetail();
+    } catch (error) {
+        console.error('Error borrowing book:', error);
     }
 };
 </script>
@@ -44,26 +67,32 @@ const fetchBookDetail = async () => {
     <VTopBar></VTopBar>
     <div class="col-title">Book Detailed Page</div>
     <div class="book-detailed">
-        <div class="col-line">Book ID: <div class="col-value" id="id"></div></div>
+        <div class="col-line">Book ID: <div class="col-value" id="id"></div>
+        </div>
 
-        <div class="col-line">Book Name: <div class="col-value" id="title"></div></div>
-        <div class="col-line">Author: <div class="col-value" id="author"></div></div>
-        <div class="col-line">Available: <div class="col-value" id="available"></div></div>
-        <div class="col-line">ISBN: <div class="col-value" id="ISBN"></div></div>
+        <div class="col-line">Book Name: <div class="col-value" id="title"></div>
+        </div>
+        <div class="col-line">Author: <div class="col-value" id="author"></div>
+        </div>
+        <div class="col-line">Available: <div class="col-value" id="available"></div>
+        </div>
+        <div class="col-line">ISBN: <div class="col-value" id="ISBN"></div>
+        </div>
     </div>
     <div class="btns-box">
-        <button class="bd-btn">Borrow</button>
+        <button class="bd-btn" @click="borrowBook">Borrow</button>
         <button class="bd-btn">Reserve</button>
     </div>
 </template>
 
 <style>
-body{
+body {
     margin: 0;
     padding: 0;
     background-color: rgb(50, 50, 50);
 }
-.book-detailed{
+
+.book-detailed {
     color: white;
     display: flex;
     flex-direction: column;

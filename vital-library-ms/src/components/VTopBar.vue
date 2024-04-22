@@ -13,7 +13,7 @@
                 <div class="psnl-box">
                     <div class="psnl-box-itm">My Account</div>
                     <div class="psnl-box-itm">My BorrowList</div>
-                    <div class="psnl-box-itm">Log Out</div>
+                    <router-link to="/"><div class="psnl-box-itm">Log Out</div></router-link>
                 </div>
             </div>
         </div>

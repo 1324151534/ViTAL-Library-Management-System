@@ -21,6 +21,10 @@ import VFonts from '@/components/VFonts.vue';
 </template>
 
 <style>
+body {
+    background-color: rgb(50, 50, 50);
+    color: white;
+}
 div {
     font-family: "MiSans";
 }

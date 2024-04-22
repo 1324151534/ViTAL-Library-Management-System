@@ -12,7 +12,7 @@
             <router-link to="/book-manage"><div class="vctrl-itm">BOOK<span class="vctrl-itm-light">MANAGEMENT</span></div></router-link>
             <router-link to="/user-manage"><div class="vctrl-itm">USER<span class="vctrl-itm-light">MANAGEMENT</span></div></router-link>
             <router-link to=""><div class="vctrl-itm">NOTIFY<span class="vctrl-itm-light">MANAGEMENT</span></div></router-link>
-            <i class="icon-logout vctrl-ico"></i>
+            <router-link to="/"><i class="icon-logout vctrl-ico"></i></router-link>
         </div>
     </div>
     <div class="empty200"></div>

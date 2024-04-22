@@ -25,7 +25,7 @@ const routes = [
         name: "member",
         component: () => import("@/pages/user.vue")
     },
-    // for admin
+    // for admin/Librarian
     {
         path: "/login-admin",
         component: () => import("@/pages/admin/login-admin.vue")
@@ -39,7 +39,9 @@ const routes = [
         component: () => import("@/pages/admin/book-manage.vue"),
     },
     {
-        path: "/book-manage-modify",
+        path: "/book-manage-modify/:id",
+        name: "bookManageModify",
+        props: true,
         component: () => import("@/pages/admin/book-manage-modify.vue"),
     },
     {

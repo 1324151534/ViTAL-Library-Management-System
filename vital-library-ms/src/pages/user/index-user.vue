@@ -3,7 +3,6 @@ import VTopBar from '@/components/VTopBar.vue';
 import VSearchBar from "@/components/VSearchBar.vue";
 import VFonts from "@/components/VFonts.vue";
 import VRecommandContainer from '@/components/VRecommandContainer.vue';
-import axios from "axios";
 import { ref } from "vue";
 
 const searchResults = ref([]);
@@ -18,7 +17,6 @@ const searchBooks = async (query) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                // 可选的其他请求头
                 // 'Access-Control-Allow-Origin': '*',
                 // 允许跨域访问
             },

@@ -1,28 +1,158 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
 import VInput from '@/components/VInput.vue';
 import VFonts from "@/components/VFonts.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const book = ref({});
+const url = window.location.href;
+const id = url.split('/')[url.split('/').length - 1];
+
+onMounted(() => {
+    fetchBookDetail();
+});
+
+const goBack = () => {
+    router.go(-1);
+}
+
+const updateBook = () => {
+    fetch(`http://localhost:5000/books/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(book.value), // 发送书本信息的 JSON 数据
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        alert('Book updated successfully');
+        // 重新获取信息
+        fetchBookDetail();
+    })
+    .catch(error => {
+        console.error('Error updating book:', error);
+    });
+
+};
+
+function showBook(){
+    alert(JSON.stringify(book));
+}
+
+const fetchBookDetail = async () => {
+    try {
+        const response = await fetch(`http://localhost:5000/books/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        book.value = await response.json();
+    } catch (error) {
+        console.error('Error fetching book details:', error);
+    }
+};
 </script>
 
 <template>
     <VTopAdminBar></VTopAdminBar>
     <div class="empty200px" style="height: 100px; width: 100%;"></div>
-    <div class="list-title-modify">Modify BOOK Name <span class="list-title-red">$BOOKNAME$</span></div>
-    <VInput>Book Name</VInput>
-    <VInput>Book Author</VInput>
-    <VInput>Book ISBN</VInput>
-    <VInput>Book Publication Year</VInput>
-    <VInput>Book Publisher</VInput>
-    <VInput>Book Genre</VInput>
-    <VInput>Book Description</VInput>
-    <VInput>Book Language</VInput>
-    <VInput>Book Number</VInput>
+    <div class="list-title-modify">Modify <span class="list-title-red">《 {{ book.title }} 》</span></div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Title:
+            <input type="text" class="vinput" v-model="book.title">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            ISBN:
+            <input type="text" class="vinput" v-model="book.isbn">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Available:
+            <input type="text" class="vinput" v-model="book.available">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Author:
+            <input type="text" class="vinput" v-model="book.author">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Description:
+            <textarea type="text" class="vinput" v-model="book.description"></textarea>
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Publication Year:
+            <input type="text" class="vinput" v-model="book.publication_year">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Publisher:
+            <input type="text" class="vinput" v-model="book.publisher">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Genre:
+            <input type="text" class="vinput" v-model="book.genre">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-text">
+            Language:
+            <input type="text" class="vinput" v-model="book.language">
+        </div>
+    </div>
+
     <div class="mod-btns">
-        <button id="smt-btn" class="summit-btn">Summit</button>
+        <button id="smt-btn" class="summit-btn" @click="updateBook">Summit</button>
     </div>
 </template>
 
 <style>
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #ff0000;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
 a {
     text-decoration: none;
 }
@@ -122,5 +252,45 @@ body {
     src: url('@/assets/fonts/MiSans/MiSans-Normal.ttf');
     font-weight: normal;
     font-style: normal;
+}
+
+.input-box {
+    width: 80%;
+    margin: auto;
+    max-width: 600px;
+    height: 125px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    color: white;
+}
+
+.input-text {
+    width: 100%;
+    text-align: left;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.vinput {
+    width: 100%;
+    height: 50px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    outline: none;
+    box-sizing: border-box;
+    border-radius: 200px;
+    padding: 10px;
+    color: white;
+}
+
+.vinput:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.vinput:focus {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgb(228, 68, 68);
 }
 </style>

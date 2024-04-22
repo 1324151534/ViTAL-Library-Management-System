@@ -2,6 +2,36 @@
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
 import VBookListContainer from '@/components/VBookListContainer.vue';
 import VFonts from "@/components/VFonts.vue";
+import { ref, onMounted } from "vue";
+
+const searchResults = ref([]);
+
+onMounted(() => {
+    searchBooks('');
+});
+
+const searchBooks = async (query) => {
+    searchResults.value = [];
+    try {
+        const response = await fetch(`http://localhost:5000/books?q=${query}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                // 'Access-Control-Allow-Origin': '*',
+                // 允许跨域访问
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        searchResults.value = Array.isArray(data) ? data : [];
+        console.log(data);
+    } catch (error) {
+        console.error('Error searching books:', error);
+        searchResults.value = [];
+    }
+};
 
 </script>
 
@@ -12,7 +42,7 @@ import VFonts from "@/components/VFonts.vue";
         <h1>BOOK <span class="title-usrnme">MANAGEMENT</span> User Interface</h1>
     </div>
     <div class="list-title">Book List</div>
-    <VBookListContainer></VBookListContainer>
+    <VBookListContainer :searchResults="searchResults"></VBookListContainer>
 </template>
 
 <style>

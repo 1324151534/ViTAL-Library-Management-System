@@ -48,7 +48,7 @@ def get_book(book_id):
     book = Book.query.get(book_id)
     if not book:
         return jsonify({'error': 'Book not found'}), 404
-    return jsonify({'id': book.id, 'title': book.title, 'author': book.author, 'isbn': book.isbn})
+    return jsonify({'id': book.id, 'title': book.title, 'author': book.author, 'isbn': book.isbn, 'available':book.available, 'publication_year':book.publication_year, 'publisher':book.publisher, 'genre':book.genre, 'description':book.description, 'language':book.language})
 
 @app.route('/books', methods=['POST'])
 def add_book():
@@ -68,11 +68,16 @@ def add_book():
     db.session.commit()
     return jsonify({'id': new_book.id, 'title': new_book.title}), 201
 
+
 @app.route('/books/<int:book_id>', methods=['PUT'])
 def update_book(book_id):
     book = Book.query.get(book_id)
     if book is None:
         return jsonify({'error': 'Book not found'}), 404
+
+    # 打印收到的数据
+    print("Received data:", request.json)
+
     data = request.get_json()
     book.title = data['title']
     book.author = data['author']
@@ -94,6 +99,16 @@ def delete_book(book_id):
     db.session.delete(book)
     db.session.commit()
     return jsonify({'message': 'Book deleted successfully'}), 200
+
+@app.route('/books/<int:book_id>/borrow', methods=['PUT'])
+def borrow_book(book_id):
+    book = Book.query.get(book_id)
+    if not book.available:
+        return jsonify({'error': 'Book is not available for borrowing'}), 400
+    # 将书籍的 available 状态改为 False
+    book.available = False
+    db.session.commit()
+    return jsonify({'message': 'Book borrowed successfully'}), 200
 
 @app.route('/')
 def welcome():
