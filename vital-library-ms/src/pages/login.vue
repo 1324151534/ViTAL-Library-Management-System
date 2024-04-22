@@ -1,0 +1,142 @@
+<script setup>
+import VFonts from '@/components/VFonts.vue';
+</script>
+
+<template>
+    <div class="titleContainer">
+        <div class="loginTitle">Welcome to ViTAL Library</div>
+    </div>
+    <div class="loginPart">
+        <h2>User Login</h2>
+        <div class="form">
+            <div style="color: white; text-align: center; margin: 20px">
+                <router-link to="/sys-login"><label style="color: white">Admin Login</label></router-link>
+            </div>
+            <div style="color: white; text-align: center; margin: 20px">
+                <router-link to="/usr-login"><label style="color: white">User Login</label></router-link>
+            </div>
+        </div>
+    </div>
+
+</template>
+<style>
+    body {
+        background-color: black;
+        color: white;
+        overflow: hidden;
+    }
+</style>
+
+<style scoped>
+body {
+    background-color: black;
+    color: white;
+    overflow: hidden;
+}
+
+.registerBtn {
+    color: #fff;
+    text-decoration: none;
+}
+
+.titleContainer {
+    width: 100vw;
+    height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loginTitle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+}
+
+.login-button {
+    width: 100%;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    background: transparent;
+    display: flex;
+    justify-content: right;
+}
+
+.loginPart {
+    /*定位方式绝对定位absolute*/
+    position: absolute;
+    /*顶和高同时设置50%实现的是同时水平垂直居中效果*/
+    top: 50%;
+    left: 50%;
+    /*实现块元素百分比下居中*/
+    transform: translate(-50%, -50%);
+    width: 450px;
+    padding: 50px;
+    background: rgb(50, 50, 50);
+    /*背景颜色为黑色，透明度为0.8*/
+    box-sizing: border-box;
+    /*box-sizing设置盒子模型的解析模式为怪异盒模型，
+    将border和padding划归到width范围内*/
+    box-shadow: 0px 15px 25px rgba(0, 0, 0, .5);
+    /*边框阴影  水平阴影0 垂直阴影15px 模糊25px 颜色黑色透明度0.5*/
+    border-radius: 15px;
+    /*边框圆角，四个角均为15px*/
+}
+
+.loginPart h2 {
+    margin: 0 0 30px;
+    padding: 0;
+    color: #fff;
+    text-align: center;
+}
+
+.inputElement {
+    display: flex;
+    margin: auto;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.inputElement input {
+    flex: 3;
+    width: 100%;
+    font-size: 18px;
+    color: #fff;
+    /*字符间的间距1px*/
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    /*背景颜色为透明*/
+    background: transparent;
+    display: flex;
+}
+
+.inputElement input:focus {
+    outline: none;
+}
+
+.inputElement label {
+    font-size: 18px;
+    display: flex;
+    flex: 0 0 100px;
+    margin-right: 10px;
+
+}
+
+a {
+    text-decoration: none;
+    color: #fff;
+}
+
+@font-face {
+    font-family: "MiSans";
+    src: url('@/assets/fonts/MiSans/MiSans-Normal.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+</style>
