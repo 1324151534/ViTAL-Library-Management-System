@@ -42,6 +42,9 @@ const searchBooks = async (query) => {
         <h1>BOOK <span class="title-usrnme">MANAGEMENT</span> User Interface</h1>
     </div>
     <div class="list-title">Book List</div>
+    <div class="ctrl-box">
+        <router-link to="/book-manage-add"><button class="add-book">ADD NEW BOOK</button></router-link>
+    </div>
     <VBookListContainer :searchResults="searchResults"></VBookListContainer>
 </template>
 
@@ -54,6 +57,34 @@ body {
     padding: 0;
     margin: 0;
     background-color: rgb(50, 50, 50);
+}
+
+.ctrl-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-book {
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    outline: none;
+    border: 2px solid rgb(150, 150, 150);
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+    transition-duration: 0.4s;
+}
+
+.add-book:hover {
+    background-color: rgb(228, 68, 68);
+}
+
+.add-book:active {
+    transition-duration: 0s;
+    background-color: rgba(228, 68, 68, 0.5);
 }
 
 .list-title {

@@ -19,6 +19,10 @@
 </template>
 
 <style>
+a {
+    text-decoration: none;
+    color: inherit;
+}
 
 .vctrl {
     height: 50px;
@@ -52,6 +56,7 @@
 }
 
 .vctrl-itm {
+    font-family: apex;
     display: flex;
     flex-direction: column;
     align-items: center;

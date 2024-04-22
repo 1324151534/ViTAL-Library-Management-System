@@ -4,29 +4,34 @@ import VFonts from '@/components/VFonts.vue';
 
 <template>
     <div class="titleContainer">
-        <h1 class="loginTitle">Welcome to ViTAL Library</h1>
+        <div class="loginTitle">Welcome to ViTAL Library</div>
     </div>
     <div class="loginPart">
         <h2>User Login</h2>
         <div class="form">
             <div style="color: white; text-align: center; margin: 20px">
-                <router-link to="/login-admin"><label>Admin Login</label></router-link>
+                <router-link to="/sys-login"><label style="color: white">Admin Login</label></router-link>
             </div>
             <div style="color: white; text-align: center; margin: 20px">
-                <router-link to="/login-user"><label>User Login</label></router-link>
+                <router-link to="/usr-login"><label style="color: white">User Login</label></router-link>
             </div>
         </div>
     </div>
 
 </template>
-
 <style>
+    body {
+        background-color: black;
+        color: white;
+        overflow: hidden;
+    }
+</style>
+
+<style scoped>
 body {
-    background-color: rgb(50, 50, 50);
+    background-color: black;
     color: white;
-}
-div {
-    font-family: "MiSans";
+    overflow: hidden;
 }
 
 .registerBtn {
@@ -35,15 +40,19 @@ div {
 }
 
 .titleContainer {
+    width: 100vw;
+    height: 10vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 10vh;
 }
 
 .loginTitle {
     display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
+    color: white;
 }
 
 .login-button {
@@ -67,7 +76,7 @@ div {
     transform: translate(-50%, -50%);
     width: 450px;
     padding: 50px;
-    background: rgba(0, 0, 0, .5);
+    background: rgb(50, 50, 50);
     /*背景颜色为黑色，透明度为0.8*/
     box-sizing: border-box;
     /*box-sizing设置盒子模型的解析模式为怪异盒模型，

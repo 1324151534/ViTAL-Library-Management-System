@@ -11,7 +11,7 @@ const url = window.location.href;
 const id = url.split('/')[url.split('/').length - 1];
 
 onMounted(() => {
-    fetchBookDetail();
+    // no need
 });
 
 const goBack = () => {
@@ -67,7 +67,7 @@ const fetchBookDetail = async () => {
 <template>
     <VTopAdminBar></VTopAdminBar>
     <div class="empty200px" style="height: 100px; width: 100%;"></div>
-    <div class="list-title-modify">Modify <span class="list-title-red">《 {{ book.title }} 》</span></div>
+    <div class="list-title-modify">Add <span class="list-title-red">Book</span></div>
 
     <div class="input-box">
         <div class="input-text">

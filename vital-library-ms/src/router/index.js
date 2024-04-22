@@ -11,6 +11,10 @@ const routes = [
         component: () => import("@/pages/user/login-user.vue"),
     },
     {
+        path: "/usr-login",
+        component: () => import("@/pages/usr-login.vue"),
+    },
+    {
         path: "/index-user",
         component: () => import("@/pages/user/index-user.vue"),
     },
@@ -31,6 +35,10 @@ const routes = [
         component: () => import("@/pages/admin/login-admin.vue")
     },
     {
+        path: "/sys-login",
+        component: () => import("@/pages/sys-login.vue"),
+    },
+    {
         path: "/index-admin",
         component: () => import("@/pages/admin/index-admin.vue"),
     },
@@ -43,6 +51,10 @@ const routes = [
         name: "bookManageModify",
         props: true,
         component: () => import("@/pages/admin/book-manage-modify.vue"),
+    },
+    {
+        path: "/book-manage-add",
+        component: () => import("@/pages/admin/book-manage-add.vue"),
     },
     {
         path: "/user-manage",

@@ -6,7 +6,7 @@ import random
 app = Flask(__name__)
 
 # 更新为 PostgreSQL 的连接字符串
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:xein@localhost/Bookroom'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost/Bookroom'
 db = SQLAlchemy(app)
 
 # 数据模型定义

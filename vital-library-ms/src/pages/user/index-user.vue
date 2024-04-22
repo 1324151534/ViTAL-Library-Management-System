@@ -4,6 +4,7 @@ import VSearchBar from "@/components/VSearchBar.vue";
 import VFonts from "@/components/VFonts.vue";
 import VRecommandContainer from '@/components/VRecommandContainer.vue';
 import { ref } from "vue";
+import '@/assets/general.css'
 
 const searchResults = ref([]);
 
@@ -37,6 +38,12 @@ const searchBooks = async (query) => {
 
 
 </script>
+
+<style>
+    body {
+        overflow: auto;
+    }
+</style>
 
 <template>
     <VTopBar></VTopBar>

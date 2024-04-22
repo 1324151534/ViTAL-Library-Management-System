@@ -40,6 +40,17 @@ const searchBooks = async (query) => {
 </template>
 
 <style>
+    body {
+        overflow: auto;
+        background-color: rgb(50, 50, 50);
+    }
+</style>
+
+<style>
+h1 {
+    font-size: 40px;
+}
+
 body {
     padding: 0;
     margin: 0;

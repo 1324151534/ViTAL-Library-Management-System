@@ -37,10 +37,16 @@
 
     .status-name {
         font-size: 30px;
+        font-family: apex;
     }
 
     .status-number {
+        font-family: apex;
         font-size: 55px;
         transition-duration: 0.4s;
+    }
+
+    .status-text {
+        font-family: apex;
     }
 </style>
