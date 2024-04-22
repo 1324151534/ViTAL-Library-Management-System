@@ -19,6 +19,21 @@ const goBack = () => {
 }
 
 const updateBook = () => {
+    // 检查所有字段是否为空
+    const requiredFields = ['title', 'author', 'isbn', 'available', 'description', 'publication_year', 'publisher', 'genre', 'language'];
+    const missingFields = [];
+
+    requiredFields.forEach(field => {
+        if (!book.value[field]) {
+            missingFields.push(field);
+        }
+    });
+
+    if (missingFields.length > 0) {
+        alert(`Please fill in the following fields: ${missingFields.join(', ')}`);
+        return;
+    }
+
     fetch(`http://localhost:5000/books/${id}`, {
         method: 'PUT',
         headers: {
@@ -26,21 +41,21 @@ const updateBook = () => {
         },
         body: JSON.stringify(book.value), // 发送书本信息的 JSON 数据
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        alert('Book updated successfully');
-        // 重新获取信息
-        fetchBookDetail();
-    })
-    .catch(error => {
-        console.error('Error updating book:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            alert('Book updated successfully');
+            // 重新获取信息
+            fetchBookDetail();
+        })
+        .catch(error => {
+            console.error('Error updating book:', error);
+        });
 
 };
 
-function showBook(){
+function showBook() {
     alert(JSON.stringify(book));
 }
 
@@ -238,7 +253,7 @@ body {
     font-family: apex;
 }
 
-.result-box{
+.result-box {
     display: flex;
     align-items: center;
     justify-content: center;

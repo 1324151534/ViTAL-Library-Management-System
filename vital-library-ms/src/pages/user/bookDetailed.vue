@@ -3,10 +3,10 @@ import { ref, onMounted} from 'vue';
 import { useRouter } from 'vue-router';
 import VTopBar from '@/components/VTopBar.vue';
 
-const book = {};
+const router = useRouter();
+const book = ref({});
 const url = window.location.href;
 const id = url.split('/')[url.split('/').length - 1];
-const router = useRouter();
 
 onMounted(() => {
     fetchBookDetail();
@@ -29,13 +29,12 @@ const fetchBookDetail = async () => {
             throw new Error('Network response was not ok');
         }
 
-        const data = await response.json();
-        book.value = data;
-        document.getElementById('id').innerHTML = book.value.id;
-        document.getElementById('title').innerHTML = book.value.title;
-        document.getElementById('author').innerHTML = book.value.author;
-        document.getElementById('available').innerHTML = book.value.available;
-        document.getElementById('ISBN').innerHTML = book.value.isbn;
+        book.value = await response.json();
+        // document.getElementById('id').innerHTML = book.value.id;
+        // document.getElementById('title').innerHTML = book.value.title;
+        // document.getElementById('author').innerHTML = book.value.author;
+        // document.getElementById('available').innerHTML = book.value.available;
+        // document.getElementById('ISBN').innerHTML = book.value.isbn;
         console.log(book);
     } catch (error) {
         console.error('Error fetching book details:', error);
@@ -105,17 +104,17 @@ const reserveBook = async () => {
     <VTopBar></VTopBar>
     <div class="col-title">Book Detailed Page</div>
     <div class="book-detailed">
-        <div class="col-line">Book ID: <div class="col-value" id="id"></div>
-        </div>
+        <div class="col-line">Book Name: <div class="col-value">{{ book.title }}</div></div>
+        <div class="col-line">Genre: <div class="col-value">{{ book.genre }}</div></div>
+        <div class="col-line">Book ID: <div class="col-value">{{ book.id }}</div></div>
+        <div class="col-line">Author: <div class="col-value">{{ book.author }}</div></div>
+        <div class="col-line">Language: <div class="col-value">{{ book.language }}</div></div>
+        <div class="col-line">Publisher: <div class="col-value">{{ book.publisher }}</div></div>
+        <div class="col-line">Publication Year: <div class="col-value">{{ book.publication_year }}</div></div>
+        <div class="col-line">ISBN: <div class="col-value">{{ book.isbn }}</div></div>
+        <div class="col-line">Available: <div style="color: red; font-weight: bolder;" class="col-value">{{ book.available ? 'Yes' : 'No' }}</div></div>
+        <div class="col-line">Description: <div class="col-value">{{ book.description }}</div></div>
 
-        <div class="col-line">Book Name: <div class="col-value" id="title"></div>
-        </div>
-        <div class="col-line">Author: <div class="col-value" id="author"></div>
-        </div>
-        <div class="col-line">Available: <div style="color: red; font-weight: bolder;" class="col-value" id="available"></div>
-        </div>
-        <div class="col-line">ISBN: <div class="col-value" id="ISBN"></div>
-        </div>
     </div>
     <div class="btns-box">
         <button class="bd-btn" @click="borrowBook">Borrow</button>

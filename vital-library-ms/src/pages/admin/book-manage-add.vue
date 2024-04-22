@@ -20,10 +20,20 @@ const goBack = () => {
 
 const addBook = () => {
     // 检查所有字段是否为空
-    if (!book.value.title || !book.value.author || !book.value.isbn) {
-        alert('Please fill in all fields!');
+    const requiredFields = ['title', 'author', 'isbn', 'available', 'description', 'publication_year', 'publisher', 'genre', 'language'];
+    const missingFields = [];
+
+    requiredFields.forEach(field => {
+        if (!book.value[field]) {
+            missingFields.push(field);
+        }
+    });
+
+    if (missingFields.length > 0) {
+        alert(`Please fill in the following fields: ${missingFields.join(', ')}`);
         return;
     }
+
     fetch(`http://localhost:5000/books`, {
         method: 'POST',
         headers: {

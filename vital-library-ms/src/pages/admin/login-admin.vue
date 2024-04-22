@@ -1,5 +1,11 @@
 <script setup>
 import VFonts from '@/components/VFonts.vue';
+import { onMounted } from 'vue';
+
+onMounted(() => {
+    // 重载页面
+    window.location.reload();
+});
 </script>
 
 <template>
