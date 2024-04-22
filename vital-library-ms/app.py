@@ -5,8 +5,11 @@ import random
 
 app = Flask(__name__)
 
+# 添加全局变量 ip_address
+ip_address = '127.0.0.1'
+
 # 更新为 PostgreSQL 的连接字符串
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost/Bookroom'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:123456@{ip_address}/Bookroom'
 db = SQLAlchemy(app)
 
 # 数据模型定义
@@ -31,13 +34,13 @@ def get_books():
 
     # 在数据库中查找匹配的书籍
     books = Book.query.filter(
-        (db.func.lower(Book.title).like(f'%{query}%')) |
-        (db.func.lower(Book.author).like(f'%{query}%')) |
-        (db.func.lower(Book.isbn).like(f'%{query}%')) |
-        (db.func.lower(Book.publisher).like(f'%{query}%')) |
-        (db.func.lower(Book.genre).like(f'%{query}%')) |
-        (db.func.lower(Book.description).like(f'%{query}%')) |
-        (db.func.lower(Book.language).like(f'%{query}%'))
+        (db.func.lower(Book.title).ilike(f'%{query}%')) |
+        (db.func.lower(Book.author).ilike(f'%{query}%')) |
+        (db.func.lower(Book.isbn).ilike(f'%{query}%')) |
+        (db.func.lower(Book.publisher).ilike(f'%{query}%')) |
+        (db.func.lower(Book.genre).ilike(f'%{query}%')) |
+        (db.func.lower(Book.description).ilike(f'%{query}%')) |
+        (db.func.lower(Book.language).ilike(f'%{query}%'))
     ).all()
 
     # 返回匹配的书籍
