@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import VTopAdminBar from '@/components/VTopAdminBar.vue';
 import VInput from '@/components/VInput.vue';
 import VFonts from "@/components/VFonts.vue";
@@ -20,7 +20,7 @@ const goBack = () => {
 
 const updateBook = () => {
     // 检查所有字段是否为空
-    const requiredFields = ['title', 'author', 'isbn', 'available', 'description', 'publication_year', 'publisher', 'genre', 'language'];
+    const requiredFields = ['title', 'author', 'isbn', 'description', 'publication_year', 'publisher', 'genre', 'language'];
     const missingFields = [];
 
     requiredFields.forEach(field => {
@@ -53,6 +53,19 @@ const updateBook = () => {
             console.error('Error updating book:', error);
         });
 
+};
+
+const available = computed({
+    get() {
+        return book.value.available === 'true';
+    },
+    set(newValue) {
+        book.value.available = newValue ? 'true' : 'false';
+    }
+});
+
+const updateAvailable = (event) => {
+    book.available = event.target.checked;
 };
 
 function showBook() {
@@ -101,7 +114,8 @@ const fetchBookDetail = async () => {
     <div class="input-box">
         <div class="input-text">
             Available:
-            <input type="text" class="vinput" v-model="book.available">
+            <input type="checkbox" class="vinput" @change="updateAvailable($event)" v-model="book.available">
+            {{ book.available }}
         </div>
     </div>
 

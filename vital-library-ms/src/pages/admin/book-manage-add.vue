@@ -20,7 +20,7 @@ const goBack = () => {
 
 const addBook = () => {
     // 检查所有字段是否为空
-    const requiredFields = ['title', 'author', 'isbn', 'available', 'description', 'publication_year', 'publisher', 'genre', 'language'];
+    const requiredFields = ['title', 'author', 'isbn', 'description', 'publication_year', 'publisher', 'genre', 'language'];
     const missingFields = [];
 
     requiredFields.forEach(field => {
