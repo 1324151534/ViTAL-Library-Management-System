@@ -71,7 +71,7 @@ const borrowBook = async () => {
 const returnBook = async () => {
     try {
         if (book.value.available) {
-            alert('Return your mother return.');
+            alert('Cannot return the book.');
             return;
         }
 
@@ -96,7 +96,7 @@ const returnBook = async () => {
 };
 
 const reserveBook = async () => {
-    alert ("This function is not completed in this version.\nConnect with the developer to get your !!!fucking!!! help.")
+    alert ("This function is not completed in this version.\nConnect with the developer to get help.")
 }
 </script>
 
@@ -113,7 +113,7 @@ const reserveBook = async () => {
         <div class="col-line">Publication Year: <div class="col-value">{{ book.publication_year }}</div></div>
         <div class="col-line">ISBN: <div class="col-value">{{ book.isbn }}</div></div>
         <div class="col-line">Available: <div style="color: red; font-weight: bolder;" class="col-value">{{ book.available ? 'Yes' : 'No' }}</div></div>
-        <div class="col-line">Description: <div class="col-value">{{ book.description }}</div></div>
+        <div class="col-line col-desc">Description: <div class="col-value">{{ book.description }}</div></div>
 
     </div>
     <div class="btns-box">
@@ -184,6 +184,7 @@ body {
     max-width: 600px;
     margin: auto;
     margin-top: 40px;
+    margin-bottom: 40px;
     height: 50px;
     display: flex;
     justify-content: space-around;
@@ -211,5 +212,11 @@ body {
 .bd-btn:active {
     transition-duration: 0s;
     background-color: rgba(228, 68, 68, 0.5);
+}
+
+.col-desc {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 </style>
