@@ -8,3 +8,7 @@
     background-color: black;
     overflow: hidden;
 }
+
+a {
+    text-decoration: none;
+}
