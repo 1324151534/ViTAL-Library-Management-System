@@ -1,5 +1,5 @@
 .DS_Store
-node_modules
+/vitalv2/node_modules
 /dist
 
 
