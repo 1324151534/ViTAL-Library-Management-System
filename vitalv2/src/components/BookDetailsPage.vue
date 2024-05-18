@@ -32,8 +32,25 @@
 
         <!-- Button Section -->
         <div class="button-section">
-            <el-button type="primary" @click="addShopList">Add to Shopping List</el-button>
+            <el-button type="primary" @click="addToBorrowingList">Add to Borrowing List</el-button>
             <el-button type="info" plain @click="goToBookList">Return to Book List</el-button>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div class="recommendations">
+            <h2>{{ recommendNotiText }}</h2>
+            <ul>
+                <li v-for="rec in recommendations" :key="rec.book_id" class="book-item"
+                    @click="viewBookDetails(rec.book_id)">
+                    <img :src="rec.cover_image" alt="Book Cover" class="book-cover">
+                    <div class="book-details">
+                        <h3>{{ rec.title }}</h3>
+                        <p><strong>Author:</strong> {{ rec.author }}</p>
+                        <p><strong>Type:</strong> {{ rec.type }}</p>
+                        <p><strong>ISBN:</strong> {{ rec.isbn }}</p>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -45,7 +62,9 @@ export default {
     data() {
         return {
             currentUser: null,
-            book: {} // 存储书籍详细信息
+            book: {}, // 存储书籍详细信息
+            recommendations: [], // 存储推荐书籍
+            recommendNotiText: 'Recommended Books'
         };
     },
     methods: {
@@ -59,18 +78,66 @@ export default {
                 const bookId = this.$route.params.id; // 从路由参数中获取书籍ID
                 const response = await axios.get(`http://localhost:5000/api/books/${bookId}`);
                 this.book = response.data;
+                this.fetchRecommendations(bookId); // 获取推荐书籍
             } catch (error) {
                 console.error('Error fetching book details:', error);
+            }
+        },
+        async fetchRecommendations(bookId) {
+            try {
+                const response = await axios.get('http://localhost:5000/api/books/recommendations', {
+                    params: {
+                        book_id: bookId,
+                        author: this.book.author,
+                        type: this.book.type
+                    }
+                });
+                this.recommendations = response.data;
+                if (response.data.length == 0) {
+                    this.recommendNotiText = 'No Recommendations Available'
+                }
+                else {
+                    this.recommendNotiText = 'Recommended Books'
+                }
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
             }
         },
         goToBookList() {
             this.$router.push({ name: 'BookList' });
         },
-        addShopList() {
-            // 借书逻辑
+        viewBookDetails(bookId) {
+            if (bookId != this.book.book_id) {
+                this.$router.push({ name: 'BookDetails', params: { id: bookId } });
+            }
+        },
+        addToBorrowingList() {
+            const userId = localStorage.getItem('currentUserId');
+            const bookId = this.$route.params.id;
+
+            if (userId) {
+                axios.post(`http://localhost:5000/api/shopping_cart/add`, { user_id: userId, book_id: bookId })
+                    .then(() => {
+                        // 在页面上显示成功消息
+                        this.$message.success('Book added to Borrowing List successfully');
+                    })
+                    .catch((res) => {
+                        // 在页面上显示错误消息
+                        this.$message.error(res.response.data.message);
+                    });
+            } else {
+                // 在页面上显示提示消息
+                this.$message.warning('Please log in to add books to Borrowing List');
+                // 在这里实现跳转到登录页面的逻辑
+            }
         },
         goToUserProfile() {
-            // 进入用户个人资料页面的逻辑
+            this.$router.push({ name: 'UserProfile'});
+        }
+    },
+    watch: {
+        '$route.params.id': function () {
+            this.fetchBookDetails(); // 当路由参数变化时重新获取书籍详细信息
         }
     },
     mounted() {
@@ -96,6 +163,7 @@ export default {
     font-size: 24px;
     color: #333;
     width: 150px;
+    cursor: pointer;
 }
 
 .user-info {
@@ -107,9 +175,11 @@ export default {
         opacity: 0;
         transform: translateY(-50px);
     }
+
     75% {
         transform: translateY(0px);
     }
+
     100% {
         opacity: 1;
     }
@@ -146,6 +216,76 @@ export default {
 .button-section {
     margin-top: 20px;
     text-align: center;
+}
+
+.recommendations {
+    margin-top: 40px;
+    width: 50%;
+    max-width: 600px;
+    min-width: 200px;
+    margin: auto;
+}
+
+.recommendations h2 {
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+}
+
+.recommendations ul {
+    list-style: none;
+    padding: 0;
+}
+
+.recommendations .book-item {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 20px;
+    transition-duration: 0.2s;
+    cursor: pointer;
+}
+
+.recommendations .book-item:hover {
+    background-color: #66666619;
+}
+
+.recommendations .book-item:active {
+    transition-duration: 0s;
+    background-color: #66666631;
+}
+
+.recommendations .book-cover {
+    width: 80px;
+    height: 120px;
+    margin-right: 20px;
+    border-radius: 5px;
+    transition-duration: 0.4s;
+}
+
+.recommendations .book-cover:hover {
+    filter: brightness(0.6);
+}
+
+.recommendations .book-details {
+    pointer-events: none;
+    flex: 1;
+}
+
+.recommendations .book-details h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.recommendations .book-details p {
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #666;
 }
 
 .user-container {

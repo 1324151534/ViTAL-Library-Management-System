@@ -43,6 +43,7 @@ export default {
           try {
             const response = await axios.post('http://localhost:5000/login', this.loginForm);
             localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+            localStorage.setItem('currentUserId', JSON.stringify(response.data.userId));
             this.$notify({
               title: 'Success',
               message: 'Login successful',

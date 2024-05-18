@@ -9,7 +9,8 @@
             </div>
             <div class="user-container">
                 <span v-if="currentUser" class="user-info">Welcome, </span>
-                <el-button type="text" @click="goToUserProfile">{{ currentUser }}</el-button>
+                <el-button v-if="currentUser" type="text" @click="goToUserProfile">{{ currentUser }}</el-button>
+                <el-button v-else type="text" @click="goToLogin">Login or Signup</el-button>
             </div>
         </header>
         <div class="book-container">
@@ -75,7 +76,10 @@ export default {
             }
         },
         goToUserProfile() {
-            // 进入用户个人资料页面的逻辑
+            this.$router.push({ name: 'UserProfile'});
+        },
+        goToLogin() {
+            this.$router.push({ name: 'Login' });
         },
         viewBookDetails(bookId) {
             this.$router.push({ name: 'BookDetails', params: { id: bookId } });

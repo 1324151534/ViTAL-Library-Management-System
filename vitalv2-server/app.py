@@ -48,6 +48,11 @@ class Books(db.Model):
             'updated_at': self.updated_at.isoformat()
         }
 
+
+class ShoppingCart(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.Integer, primary_key=True)
+
 # 创建数据库和表
 with app.app_context():
     db.create_all()
@@ -80,7 +85,7 @@ def login():
     user = Users.query.filter_by(username=username).first()
 
     if user and bcrypt.check_password_hash(user.password, password):
-        return jsonify({'message': 'Login successful!', 'user': username}), 200
+        return jsonify({'message': 'Login successful!', 'user': username, 'userId': user.id}), 200
     else:
         return jsonify({'error': 'Invalid username or password'}), 401
 
@@ -108,6 +113,60 @@ def get_book(book_id):
         return jsonify(book.serialize()), 200
     else:
         return jsonify({'error': 'Book not found'}), 404
+
+# 获取推荐书籍
+@app.route('/api/books/recommendations', methods=['GET'])
+def get_recommendations():
+    book_id = request.args.get('book_id')
+    author = request.args.get('author')
+    type = request.args.get('type')
+
+    recommendations = Books.query.filter(
+        ((Books.author == author) | (Books.type == type)) &
+        (Books.book_id != book_id)
+    ).limit(5).all()
+
+    recommendation_list = [book.serialize() for book in recommendations]
+    return jsonify(recommendation_list), 200
+
+@app.route('/api/shopping_cart/add', methods=['POST'])
+def add_to_shopping_cart():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+
+    if user_id and book_id:
+        # 检查购物车中是否已经存在相同的记录
+        existing_item = ShoppingCart.query.filter_by(user_id=user_id, book_id=book_id).first()
+        if existing_item:
+            return jsonify({'message': 'Book already exists in Borrowing List'}), 400
+        else:
+            new_item = ShoppingCart(user_id=user_id, book_id=book_id)
+            db.session.add(new_item)
+            db.session.commit()
+            return jsonify({'message': 'Book added to Borrowing List successfully'}), 200
+    else:
+        return jsonify({'error': 'Invalid user ID or book ID'}), 400
+
+# 根据用户ID获取借阅列表
+@app.route('/api/shopping_cart/<int:user_id>', methods=['GET'])
+def get_borrowing_list(user_id):
+    borrowing_list = ShoppingCart.query.filter_by(user_id=user_id).all()
+    if borrowing_list:
+        list_data = []
+        for record in borrowing_list:
+            book = Books.query.get(record.book_id)
+            if book:
+                book_data = {
+                    'book_id': book.book_id,
+                    'title': book.title,
+                    'author': book.author,
+                    'quantity': book.quantity
+                }
+                list_data.append(book_data)
+        return jsonify(list_data), 200
+    else:
+        return jsonify({'message': 'No borrowing list found for this user'}), 404
 
 
 if __name__ == '__main__':
