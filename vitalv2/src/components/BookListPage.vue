@@ -13,7 +13,7 @@
             </div>
         </header>
         <div class="book-container">
-            <h2>All Books</h2>
+            <h2>{{ searchInfo }}</h2>
             <ul>
                 <li v-for="book in books" :key="book.book_id" class="book-item" @click="viewBookDetails(book.book_id)">
                     <img :src="book.cover_image" alt="Book Cover" class="book-cover">
@@ -39,7 +39,9 @@ export default {
     data() {
         return {
             currentUser: null,
-            books: []
+            books: [],
+            searchKeyword: '', // 搜索关键词
+            searchInfo: 'All Books'
         };
     },
     methods: {
@@ -51,10 +53,30 @@ export default {
                 console.error('Error fetching books:', error);
             }
         },
+        async searchBooks() {
+            // 清空当前书籍列表
+            this.books = [];
+
+            try {
+                const response = await axios.get('http://localhost:5000/api/books', {
+                    params: {
+                        search: this.searchKeyword
+                    }
+                });
+                this.books = response.data;
+                if (this.searchKeyword == '') {
+                    this.searchInfo = 'All Books'
+                }
+                else {
+                    this.searchInfo = 'Search results for ' + this.searchKeyword;
+                }
+            } catch (error) {
+                console.error('Error searching books:', error);
+            }
+        },
         goToUserProfile() {
             // 进入用户个人资料页面的逻辑
         },
-        // 查看书籍详细信息的方法
         viewBookDetails(bookId) {
             this.$router.push({ name: 'BookDetails', params: { id: bookId } });
         },

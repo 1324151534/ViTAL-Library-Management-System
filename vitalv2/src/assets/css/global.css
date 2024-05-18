@@ -1,5 +1,6 @@
 /* src/assets/css/global.css */
 body {
-    font-family: 'Roboto', sans-serif;
-  }
-  
+  font-family: 'Roboto', sans-serif;
+  padding: 0;
+  margin: 0;
+}

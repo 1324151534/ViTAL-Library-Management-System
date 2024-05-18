@@ -32,9 +32,8 @@
 
         <!-- Button Section -->
         <div class="button-section">
-            <el-button type="primary" @click="borrowBook">Borrow</el-button>
-            <el-button type="success" @click="returnBook">Return</el-button>
-            <el-button type="warning" @click="reserveBook">Reserve</el-button>
+            <el-button type="primary" @click="addShopList">Add to Shopping List</el-button>
+            <el-button type="info" plain @click="goToBookList">Return to Book List</el-button>
         </div>
     </div>
 </template>
@@ -67,14 +66,8 @@ export default {
         goToBookList() {
             this.$router.push({ name: 'BookList' });
         },
-        borrowBook() {
+        addShopList() {
             // 借书逻辑
-        },
-        returnBook() {
-            // 还书逻辑
-        },
-        reserveBook() {
-            // 预定书籍逻辑
         },
         goToUserProfile() {
             // 进入用户个人资料页面的逻辑
@@ -94,6 +87,8 @@ export default {
     padding: 20px;
     background-color: #00000010;
     color: #fff;
+    position: relative;
+    z-index: 999;
 }
 
 .header h1 {
@@ -107,7 +102,21 @@ export default {
     color: black;
 }
 
+@keyframes bk-dtl-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    75% {
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .book-details {
+    animation: bk-dtl-in 1s;
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;

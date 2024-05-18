@@ -87,7 +87,16 @@ def login():
 # 获取所有书籍列表
 @app.route('/api/books', methods=['GET'])
 def get_books():
-    books = Books.query.all()
+    search_keyword = request.args.get('search')
+    if search_keyword:
+        books = Books.query.filter(
+            (Books.title.ilike(f'%{search_keyword}%')) |
+            (Books.author.ilike(f'%{search_keyword}%')) |
+            (Books.description.ilike(f'%{search_keyword}%'))
+        ).all()
+    else:
+        books = Books.query.all()
+        
     book_list = [book.serialize() for book in books]
     return jsonify(book_list), 200
 
