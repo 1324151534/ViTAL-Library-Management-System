@@ -2,12 +2,11 @@
     <div class="admin-container">
         <!-- Header Section -->
         <header class="header">
-            <h1>ViTAL LMS</h1>
-            <h5>Admin Control Panel</h5>
+            <h2>ViTAL <span style="font-weight: normal">LMS <span style="color: gray;">CONTROL PANEL</span></span></h2>
             <div class="user-container">
-                <p v-if="currentAdminId">Welcome, {{ currentAdminName }}</p>
-                <p v-else>Please login first.</p>
-                <el-button v-if="currentAdminId" type="text" @click="logout">Logout</el-button>
+                <p v-if="currentAdminId" class="admin-top">Welcome, {{ currentAdminName }}</p>
+                <p v-else class="admin-top">Please login first.</p>
+                <el-button class="admin-top" v-if="currentAdminId" type="text" @click="logout">Logout</el-button>
             </div>
         </header>
 
@@ -19,7 +18,7 @@
                 <el-input v-model="searchBook" placeholder="Search Books" @input="fetchBooks"></el-input>
                 <el-button style="margin-left: 10px;" type="primary" @click="openAddBookDialog">Add Book</el-button>
             </div>
-            <el-table :data="books" style="width: 100%">
+            <el-table :data="books" style="width: 100%" empty-text="No Book Available">
                 <el-table-column min-width="20%" prop="book_id" label="ID"></el-table-column>
                 <el-table-column min-width="150%" prop="title" label="Title"></el-table-column>
                 <el-table-column min-width="80%" prop="author" label="Author"></el-table-column>
@@ -44,7 +43,7 @@
             <div class="search-container">
                 <el-input v-model="searchUser" placeholder="Search Users" @input="fetchUsers"></el-input>
             </div>
-            <el-table :data="users" style="width: 100%">
+            <el-table :data="users" style="width: 100%" empty-text="No User Available">
                 <el-table-column min-width="30%" prop="username" label="Username"></el-table-column>
                 <el-table-column min-width="70%">
                     <template slot-scope="scope">
@@ -215,8 +214,15 @@ export default {
             this.editBookForm = { ...book, published_date: book.published_date ? new Date(book.published_date) : null };
             this.editBookDialogVisible = true;
         },
-        delBook(book) {
-            console.log(book);
+        async delBook(book) {
+            try {
+                await axios.delete(`http://localhost:5000/api/books/${book.book_id}`);
+                this.fetchBooks();
+                this.$message.success('Book deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                this.$message.error('Failed to delete book.');
+            }
         },
         async updateBook() {
             try {
@@ -266,12 +272,17 @@ export default {
         viewBorrowingRecords(userId) {
             console.log(userId);
             // Implement viewing borrowing records
-        }, 
+        },
         async viewShoppingCart(userId) {
             try {
                 const response = await axios.get(`http://localhost:5000/api/shopping_cart/${userId}`);
-                this.userShoppingCart = response.data;
-                this.shoppingCartDialogVisible = true;
+                if (response.data.length > 0) {
+                    this.userShoppingCart = response.data;
+                    this.shoppingCartDialogVisible = true;
+                }
+                else {
+                    this.$message.error('User Borrowing List is Empty.');
+                }
             } catch (error) {
                 console.error('Error fetching user shopping cart:', error);
             }
@@ -292,8 +303,10 @@ export default {
 </script>
 
 <style scoped>
-.admin-container {
-    padding: 20px;
+.admin-top {
+    font-size: larger;
+    font-weight: lighter;
+    margin-left: 5px;
 }
 
 .header {
@@ -301,6 +314,11 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    background-color: rgb(245, 245, 245);
+    width: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+    margin-bottom: 40px;
 }
 
 .user-container {

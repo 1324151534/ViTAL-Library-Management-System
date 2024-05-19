@@ -3,7 +3,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__, static_folder='covers')
 app.config.from_object(Config)
@@ -131,7 +131,13 @@ def admin_login():
 # 用户列表
 @app.route('/api/users', methods=['GET'])
 def get_users():
-    users = Users.query.all()
+    search_keyword = request.args.get('search')
+    if search_keyword:
+        users = Users.query.filter(
+            (Users.username.ilike(f'%{search_keyword}%'))
+        ).all()
+    else:
+        users = Users.query.all()
     user_list = [{'id': user.id, 'username': user.username} for user in users]
     return jsonify(user_list), 200   
 
@@ -212,24 +218,7 @@ def get_borrowing_list(user_id):
                 list_data.append(book_data)
         return jsonify(list_data), 200
     else:
-        return jsonify({'message': 'No borrowing list found for this user'}), 404
-
-# 创建借书记录
-@app.route('/api/borrowing_records', methods=['POST'])
-def create_borrowing_record():
-    data = request.get_json()
-    user_id = data.get('user_id')
-    book_id = data.get('book_id')
-    
-    new_record = BorrowingRecord(user_id=user_id, book_id=book_id)
-
-    try:
-        db.session.add(new_record)
-        db.session.commit()
-        return jsonify({'message': 'Borrowing record created successfully!'}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        return jsonify({}), 200
 
 # 获取某个用户的借书记录
 @app.route('/api/borrowing_records/<int:user_id>', methods=['GET'])
@@ -279,6 +268,144 @@ def update_book(book_id):
         return jsonify({'message': 'Book updated successfully!'}), 200
     else:
         return jsonify({'error': 'Book not found'}), 404
+
+# 删除书籍
+@app.route('/api/books/<int:book_id>', methods=['DELETE'])
+def delete_book(book_id):
+    try:
+        book = Books.query.get(book_id)
+        if book:
+            db.session.delete(book)
+            db.session.commit()
+            return jsonify({'message': 'Book deleted successfully!'}), 200
+        else:
+            return jsonify({'error': 'Book not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# 删除Cart中图书
+@app.route('/api/shopping_cart/<int:user_id>/<int:book_id>', methods=['DELETE'])
+def delete_book_from_cart(user_id, book_id):
+    try:
+        item = ShoppingCart.query.filter_by(user_id=user_id, book_id=book_id).first()
+        if item:
+            db.session.delete(item)
+            db.session.commit()
+            return jsonify({'message': 'Book removed from borrowing list successfully'}), 200
+        else:
+            return jsonify({'error': 'Book not found in borrowing list'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# 修改密码
+@app.route('/api/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    new_password = data.get('newPassword')
+    hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+    user = Users.query.get(user_id)
+    if user:
+        try:
+            user.password = hashed_password
+            db.session.commit()
+            return jsonify({'message': 'Password changed successfully'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'User not found'}), 404
+    
+# 创建借书记录
+@app.route('/api/borrowing_records', methods=['POST'])
+def create_borrowing_record():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+    
+    book = Books.query.get(book_id)
+    if book and book.quantity > 1:
+        new_record = BorrowingRecord(
+            user_id=user_id,
+            book_id=book_id,
+            borrow_date=datetime.utcnow(),
+            return_date=datetime.utcnow() + timedelta(days=30),
+            extension_count=0
+        )
+        book.quantity -= 1
+        try:
+            db.session.add(new_record)
+            db.session.commit()
+            return jsonify({'message': 'Borrowing record created successfully!'}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Book is not available for borrowing'}), 400
+
+# 删除借书记录
+@app.route('/api/borrowing_records/<int:record_id>', methods=['DELETE'])
+def delete_borrowing_record(record_id):
+    try:
+        record = BorrowingRecord.query.get(record_id)
+        if record:
+            book = Books.query.get(record.book_id)
+            if book:
+                book.quantity += 1
+            db.session.delete(record)
+            db.session.commit()
+            return jsonify({'message': 'Borrowing record deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Borrowing record not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# 延长还书期限
+@app.route('/api/borrowing_records/extend/<int:record_id>', methods=['PUT'])
+def extend_borrowing_record(record_id):
+    try:
+        record = BorrowingRecord.query.get(record_id)
+        if record:
+            if record.extension_count < 3:
+                record.return_date += timedelta(days=30)
+                record.extension_count += 1
+                db.session.commit()
+                return jsonify({'message': 'Borrowing record extended successfully'}), 200
+            else:
+                return jsonify({'error': 'Maximum extension limit reached'}), 400
+        else:
+            return jsonify({'error': 'Borrowing record not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# 某个用户的借书记录
+@app.route('/api/user_borrowing_records/<int:user_id>', methods=['GET'])
+def get_user_borrowing_records(user_id):
+    try:
+        user_borrowing_records = BorrowingRecord.query.filter_by(user_id=user_id).all()
+        records = []
+        for record in user_borrowing_records:
+            book = Books.query.get(record.book_id)
+            if book:
+                book_info = {
+                    'record_id': record.record_id,
+                    'book_id': book.book_id,
+                    'title': book.title,
+                    'author': book.author,
+                    'borrow_date': record.borrow_date.isoformat() if record.borrow_date else None,
+                    'return_date': record.return_date.isoformat() if record.return_date else None,
+                    'extension_count': record.extension_count
+                }
+                records.append(book_info)
+        return jsonify(records), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
