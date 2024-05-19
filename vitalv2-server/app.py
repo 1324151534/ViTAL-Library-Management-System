@@ -3,6 +3,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from datetime import datetime
 
 app = Flask(__name__, static_folder='covers')
 app.config.from_object(Config)
@@ -52,6 +53,31 @@ class Books(db.Model):
 class ShoppingCart(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, primary_key=True)
+    
+class BorrowingRecord(db.Model):
+    __tablename__ = 'borrowing_records'
+
+    record_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), nullable=False)
+    borrow_date = db.Column(db.DateTime, default=datetime.utcnow)
+    return_date = db.Column(db.DateTime, nullable=True)
+    extension_count = db.Column(db.Integer, default=0)
+    
+    def serialize(self):
+        return {
+            'record_id': self.record_id,
+            'user_id': self.user_id,
+            'book_id': self.book_id,
+            'borrow_date': self.borrow_date.isoformat() if self.borrow_date else None,
+            'return_date': self.return_date.isoformat() if self.return_date else None,
+            'extension_count': self.extension_count
+        }
+        
+class Admins(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.Text, nullable=False)
 
 # 创建数据库和表
 with app.app_context():
@@ -88,6 +114,26 @@ def login():
         return jsonify({'message': 'Login successful!', 'user': username, 'userId': user.id}), 200
     else:
         return jsonify({'error': 'Invalid username or password'}), 401
+
+# 管理员登录
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+    admin = Admins.query.filter_by(username=username).first()
+
+    if admin and bcrypt.check_password_hash(admin.password, password):
+        return jsonify({'userId': admin.id, 'username': admin.username}), 200
+    else:
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
+# 用户列表
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    users = Users.query.all()
+    user_list = [{'id': user.id, 'username': user.username} for user in users]
+    return jsonify(user_list), 200   
 
 # 获取所有书籍列表
 @app.route('/api/books', methods=['GET'])
@@ -168,6 +214,71 @@ def get_borrowing_list(user_id):
     else:
         return jsonify({'message': 'No borrowing list found for this user'}), 404
 
+# 创建借书记录
+@app.route('/api/borrowing_records', methods=['POST'])
+def create_borrowing_record():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+    
+    new_record = BorrowingRecord(user_id=user_id, book_id=book_id)
+
+    try:
+        db.session.add(new_record)
+        db.session.commit()
+        return jsonify({'message': 'Borrowing record created successfully!'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# 获取某个用户的借书记录
+@app.route('/api/borrowing_records/<int:user_id>', methods=['GET'])
+def get_borrowing_records(user_id):
+    borrowing_records = BorrowingRecord.query.filter_by(user_id=user_id).all()
+    if borrowing_records:
+        records = [record.serialize() for record in borrowing_records]
+        return jsonify(records), 200
+    else:
+        return jsonify({'message': 'No borrowing records found for this user'}), 404
+
+# 添加新书籍
+@app.route('/api/books', methods=['POST'])
+def add_book():
+    data = request.get_json()
+    new_book = Books(
+        title=data['title'],
+        author=data['author'],
+        quantity=data['quantity'],
+        isbn=data.get('isbn'),
+        type=data.get('type'),
+        cover_image=data.get('cover_image'),
+        location=data.get('location'),
+        description=data.get('description'),
+        published_date=data.get('published_date')
+    )
+    db.session.add(new_book)
+    db.session.commit()
+    return jsonify({'message': 'Book added successfully!'}), 201
+
+# 更新现有书籍
+@app.route('/api/books/<int:book_id>', methods=['PUT'])
+def update_book(book_id):
+    data = request.get_json()
+    book = Books.query.get(book_id)
+    if book:
+        book.title = data['title']
+        book.author = data['author']
+        book.quantity = data['quantity']
+        book.isbn = data.get('isbn')
+        book.type = data.get('type')
+        book.cover_image = data.get('cover_image')
+        book.location = data.get('location')
+        book.description = data.get('description')
+        book.published_date = data.get('published_date')
+        db.session.commit()
+        return jsonify({'message': 'Book updated successfully!'}), 200
+    else:
+        return jsonify({'error': 'Book not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

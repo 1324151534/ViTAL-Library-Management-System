@@ -158,7 +158,7 @@
   
   .record-item {
     margin-bottom: 15px;
-    border: 1px solid #333;
+    border: 2px solid #e0e0e0;
     list-style-type: none;
     padding: 20px;
     border-radius: 10px;

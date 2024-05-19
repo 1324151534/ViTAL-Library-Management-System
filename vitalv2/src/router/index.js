@@ -5,6 +5,8 @@ import Register from '@/components/RegisterPage.vue';
 import BookListPage from '@/components/BookListPage.vue';
 import BookDetailsPage from '@/components/BookDetailsPage.vue';
 import UserProfilePage from '@/components/UserProfilePage.vue';
+import AdminPage from '@/components/AdminPage.vue';
+import AdminLoginPage from '@/components/AdminLoginPage.vue';
 
 Vue.use(VueRouter);
 
@@ -33,6 +35,16 @@ const routes = [
     path: '/user-profile',
     name: 'UserProfile',
     component: UserProfilePage
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: AdminPage
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLoginPage
   }
 ];
 
