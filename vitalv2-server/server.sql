@@ -58,3 +58,9 @@ VALUES
     ('The Road', '978-0307387899', 'Post-Apocalyptic Fiction', 'Cormac McCarthy', 'http://localhost:5000/covers/the_road.jpg', 'F5-554', 10, 'The Road is a 2006 post-apocalyptic novel by American writer Cormac McCarthy. The book details the journey of a father and his young son over a period of several months across a landscape blasted by an unspecified cataclysm.', '2006-09-26'),
     ('Frankenstein', '978-0486282114', 'Gothic Fiction', 'Mary Shelley', 'http://localhost:5000/covers/frankenstein.jpg', 'F3-121', 8, 'Frankenstein; or, The Modern Prometheus is a novel written by English author Mary Shelley, published in 1818.', '1818-01-01'),
     ('The Road Less Traveled', '978-0743243155', 'Psychology', 'M. Scott Peck', 'http://localhost:5000/covers/the_road_less_traveled.jpg', 'F1-442', 6, 'The Road Less Traveled: A New Psychology of Love, Traditional Values and Spiritual Growth is a self-help book written by psychiatrist M. Scott Peck, first published in 1978.', '1978-01-01');
+
+CREATE TABLE admins (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password TEXT NOT NULL
+);
