@@ -131,7 +131,7 @@
             </div>
         </el-dialog>
 
-        <!-- User Shopping Cart Dialog -->
+        <!-- User Borrowing Lists Dialog -->
         <el-dialog title="User Borrowing List" :visible.sync="shoppingCartDialogVisible">
             <el-table :data="userShoppingCart" style="width: 100%">
                 <el-table-column min-width="60%" prop="title" label="Title"></el-table-column>
@@ -140,6 +140,20 @@
             </el-table>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="shoppingCartDialogVisible = false">Close</el-button>
+            </div>
+        </el-dialog>
+
+        <!-- User Borrowing Records Dialog -->
+        <el-dialog title="User Borrowing Records" :visible.sync="borrowingRecordsDialogVisible">
+            <el-table :data="userBorrowingList" style="width: 100%">
+                <el-table-column min-width="60%" prop="title" label="Title"></el-table-column>
+                <el-table-column min-width="30%" prop="author" label="Author"></el-table-column>
+                <el-table-column min-width="60%" prop="borrow_date" label="Borrow from"></el-table-column>
+                <el-table-column min-width="60%" prop="return_date" label="Due to"></el-table-column>
+                <el-table-column min-width="30%" prop="extension_count" label="Renewed"></el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="borrowingRecordsDialogVisible = false">Close</el-button>
             </div>
         </el-dialog>
     </div>
@@ -158,7 +172,9 @@ export default {
             editBookDialogVisible: false,
             addBookDialogVisible: false,
             shoppingCartDialogVisible: false,
+            borrowingRecordsDialogVisible: false,
             userShoppingCart: [],
+            userBorrowingList: [],
             currentAdminId: null,
             currentAdminName: null,
             editBookForm: {
@@ -269,9 +285,20 @@ export default {
                 this.$message.error('Failed to add book.');
             }
         },
-        viewBorrowingRecords(userId) {
-            console.log(userId);
-            // Implement viewing borrowing records
+        async viewBorrowingRecords(userId) {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/user_borrowing_records/${userId}`);
+                if (response.data.length > 0) {
+                    this.userBorrowingList = response.data;
+                    this.borrowingRecordsDialogVisible = true;
+                }
+                else {
+                    this.$message.error('User Borrowing Record is Empty.');
+                }
+            } catch (error) {
+                this.$message.error('Error fetching user Borrowing Record.');
+                console.error('Error fetching user Borrowing Record:', error);
+            }
         },
         async viewShoppingCart(userId) {
             try {
@@ -284,7 +311,8 @@ export default {
                     this.$message.error('User Borrowing List is Empty.');
                 }
             } catch (error) {
-                console.error('Error fetching user shopping cart:', error);
+                this.$message.error('Error fetching user Borrowing List.');
+                console.error('Error fetching user Borrowing List:', error);
             }
         },
         sendNotification(userId) {
@@ -292,7 +320,10 @@ export default {
             // Implement sending notification
         },
         logout() {
-            // Implement logout logic
+            localStorage.removeItem('currentAdminUsername'); 
+            localStorage.removeItem('currentAdminId');
+            this.$router.push({ name: 'AdminLogin' });
+            this.$message.info('Logged Out.');
         }
     },
     mounted() {

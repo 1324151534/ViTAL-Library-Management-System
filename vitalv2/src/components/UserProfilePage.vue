@@ -22,8 +22,16 @@
               <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
             </div>
           </div>
-          <el-button style="width: 55px; height: 55px;" type="danger" icon="el-icon-delete"
-            @click="deleteBook(record.book_id)" circle></el-button>
+          <div class="button-container-list">
+            <el-tooltip content="Reserve Book" placement="top">
+              <el-button v-if="record.quantity == 0" style="width: 55px; height: 55px;" type="warning"
+                icon="el-icon-time" @click="reserveBook(record.book_id)" circle></el-button>
+            </el-tooltip>
+            <el-tooltip content="Delete Book" placement="top">
+              <el-button style="width: 55px; height: 55px;" type="danger" icon="el-icon-delete"
+                @click="deleteBook(record.book_id)" circle></el-button>
+            </el-tooltip>
+          </div>
         </li>
       </ul>
       <div v-if="currentUser" class="rec-ctrl-container">
@@ -38,6 +46,10 @@
         <li v-for="record in borrowingRecords" :key="record.record_id" class="record-item">
           <div class="book-container">
             <p class="rec-title">{{ record.title }}</p>
+            <el-tooltip content="If you have any question, please contant ViTAL librarian." placement="top-start">
+              <p class="rec-title-location"><span style="font-weight: normal; color: black;">Please fetch the book at
+                </span>{{ record.location }}</p>
+            </el-tooltip>
             <div class="book-info-container-record">
               <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
               <div class="book-info"><strong>Borrowed from:</strong> {{ record.borrow_date }}</div>
@@ -46,17 +58,19 @@
             </div>
           </div>
           <div class="button-container">
-            <el-button style="width: 125px; height: 45px; border-radius: 100px;" type="primary" icon="el-icon-refresh"
-              @click="renewBook()" plain>Renew</el-button>
-            <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;" type="primary" icon="el-icon-refresh-left"
-              @click="returnBook()">Return</el-button>
+            <el-tooltip content="You can renew 3 times, 30 days each time, for each book." placement="top">
+              <el-button style="width: 125px; height: 45px; border-radius: 100px;" type="primary" icon="el-icon-refresh"
+                @click="renewBook(record.record_id)" plain>Renew</el-button>
+            </el-tooltip>
+            <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+              type="primary" icon="el-icon-refresh-left" @click="returnBook(record.record_id)">Return</el-button>
           </div>
         </li>
       </ul>
     </div>
 
     <!-- Change Password Section -->
-    <h2 v-if="currentUser">Change Password</h2>
+    <h2 v-if="currentUser" style="font-size: 20px;">Change Password</h2>
     <div v-if="currentUser" class="change-password">
       <div class="password-input">
         <el-input v-model="newPassword" type="password" placeholder="Enter new password"></el-input>
@@ -65,6 +79,25 @@
         <el-button type="primary" @click="changePassword">Change Password</el-button>
       </div>
     </div>
+
+    <!-- Failed Borrowing Records Dialog -->
+    <el-dialog title="User Reserve Lists" :visible.sync="reserveBookDialogVisible">
+      <el-table :data="failedRecords" style="width: 100%">
+        <el-table-column min-width="50%" prop="title" label="Title"></el-table-column>
+        <el-table-column min-width="20%" prop="author" label="Author"></el-table-column>
+        <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
+        <el-table-column min-width="10%" label="">
+            <el-tooltip content="Reserve Book" placement="top">
+              <el-button style="width: 50px; height: 50px;" type="warning"
+                icon="el-icon-time" @click="reserveBook(record.book_id)" circle></el-button>
+            </el-tooltip>
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="reserveBookDialogVisible = false">Close</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -79,6 +112,8 @@ export default {
       BorrowingListInfo: 'Borrowing List',
       borrowingRecords: [],
       borrowingRecordInfo: 'Borrowing Record',
+      failedRecords: [],
+      reserveBookDialogVisible: false,
       newPassword: ''
     };
   },
@@ -135,6 +170,24 @@ export default {
         this.$message.error('Failed to remove book. Please try again.');
       }
     },
+    async returnBook(record_id) {
+      try {
+        await axios.delete(`http://localhost:5000/api/borrowing_records/${record_id}`);
+        this.fetchBorrowingRecords();
+        this.$message.success('Book returned successfully!');
+      } catch (error) {
+        this.$message.error('Failed to return book.');
+      }
+    },
+    async renewBook(record_id) {
+      try {
+        const res = await axios.put(`http://localhost:5000/api/borrowing_records/extend/${record_id}`);
+        this.fetchBorrowingRecords();
+        this.$message.success(res.data.message);
+      } catch (error) {
+        this.$message.error(error.response.data.message);
+      }
+    },
     async borrowAllBooks() {
       try {
         const userId = localStorage.getItem('currentUserId');
@@ -143,12 +196,15 @@ export default {
         // Iterate over borrowingLists and try to add each book to BorrowingRecord
         for (const record of this.borrowingLists) {
           const data = { user_id: userId, book_id: record.book_id };
+          console.log(data)
           const response = await axios.post('http://localhost:5000/api/borrowing_records', data);
 
           // If adding book to BorrowingRecord is successful, remove it from borrowingLists
           if (response.status === 201) {
             try {
               await axios.delete(`http://localhost:5000/api/shopping_cart/${userId}/${record.book_id}`);
+              this.fetchBorrowingRecords();
+              this.fetchBorrowingLists();
             } catch (deleteError) {
               console.error('Error deleting book from borrowing list:', deleteError);
               failedRecords.push(record);
@@ -157,21 +213,26 @@ export default {
             failedRecords.push(record);
           }
         }
+        this.failedRecords = failedRecords;
 
         // Display message about failed records, if any
         if (failedRecords.length > 0) {
           const failedTitles = failedRecords.map(record => record.title).join(', ');
           this.$message.error(`Failed to borrow books: ${failedTitles}`);
+          this.reserveBookDialogVisible = true;
         } else {
           this.$message.success('All books borrowed successfully!');
         }
       } catch (error) {
-        console.error('Error borrowing all books:', error);
-        this.$message.error('Failed to borrow books. Please try again.');
+        // console.error('Error borrowing all books:', error);
+        this.$message.error(error.response.data.error);
       }
     },
-
     logout() {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentUserId');
+      this.$router.push({ name: 'Login' });
+      this.$message.info('Logged Out.');
       // Perform logout logic, e.g., clear localStorage, redirect to login page, etc.
     }
   },
@@ -265,7 +326,14 @@ ul {
 
 .rec-title {
   font-weight: bold;
+  margin-top: 0;
   font-size: larger;
+}
+
+.rec-title-location {
+  font-weight: bold;
+  color: #881010;
+  width: auto;
   margin-top: 0;
   margin-bottom: 10px;
 }
@@ -291,6 +359,15 @@ ul {
   margin-right: 0px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-container-list {
+  width: auto;
+  margin: auto;
+  margin-right: 0px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }

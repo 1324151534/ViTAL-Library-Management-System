@@ -327,6 +327,7 @@ def create_borrowing_record():
     book_id = data.get('book_id')
     
     book = Books.query.get(book_id)
+    book_title = book.title
     if book and book.quantity > 1:
         new_record = BorrowingRecord(
             user_id=user_id,
@@ -344,7 +345,7 @@ def create_borrowing_record():
             db.session.rollback()
             return jsonify({'error': str(e)}), 400
     else:
-        return jsonify({'error': 'Book is not available for borrowing'}), 400
+        return jsonify({'error': f'Book {book_title} is not available for borrowing'}), 200
 
 # 删除借书记录
 @app.route('/api/borrowing_records/<int:record_id>', methods=['DELETE'])
@@ -376,9 +377,9 @@ def extend_borrowing_record(record_id):
                 db.session.commit()
                 return jsonify({'message': 'Borrowing record extended successfully'}), 200
             else:
-                return jsonify({'error': 'Maximum extension limit reached'}), 400
+                return jsonify({'message': 'Maximum extension limit reached'}), 400
         else:
-            return jsonify({'error': 'Borrowing record not found'}), 404
+            return jsonify({'message': 'Borrowing record not found'}), 404
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
@@ -397,6 +398,7 @@ def get_user_borrowing_records(user_id):
                     'book_id': book.book_id,
                     'title': book.title,
                     'author': book.author,
+                    'location': book.location,
                     'borrow_date': record.borrow_date.isoformat() if record.borrow_date else None,
                     'return_date': record.return_date.isoformat() if record.return_date else None,
                     'extension_count': record.extension_count
