@@ -69,6 +69,27 @@
       </ul>
     </div>
 
+    <!-- Reservation Table -->
+    <div class="borrowing-records">
+      <h2>{{ reservationInfo }}</h2>
+      <ul v-if="currentUser">
+        <li v-for="record in reservations" :key="record.reservation_id" class="record-item">
+          <div class="book-container">
+            <p class="rec-title">{{ record.title }}</p>
+            <div class="book-info-container-record">
+              <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
+              <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
+              <div class="book-info"><strong>Reserve time:</strong> {{ record.reservation_date }}</div>
+            </div>
+          </div>
+          <div class="button-container">
+            <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+              type="danger" icon="el-icon-close" @click="cancelResv(record.reservation_id)">Cancel</el-button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
     <!-- Change Password Section -->
     <h2 v-if="currentUser" style="font-size: 20px;">Change Password</h2>
     <div v-if="currentUser" class="change-password">
@@ -87,10 +108,13 @@
         <el-table-column min-width="20%" prop="author" label="Author"></el-table-column>
         <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
         <el-table-column min-width="10%" label="">
+          <template slot-scope="scope">
             <el-tooltip content="Reserve Book" placement="top">
-              <el-button style="width: 50px; height: 50px;" type="warning"
-                icon="el-icon-time" @click="reserveBook(record.book_id)" circle></el-button>
+              <el-button style="width: 50px; height: 50px;" type="warning" icon="el-icon-time"
+                @click="reserveBook(scope.row.book_id)" circle>
+              </el-button>
             </el-tooltip>
+          </template>
         </el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
@@ -112,6 +136,8 @@ export default {
       BorrowingListInfo: 'Borrowing List',
       borrowingRecords: [],
       borrowingRecordInfo: 'Borrowing Record',
+      reservationInfo: 'Reservations',
+      reservations: [],
       failedRecords: [],
       reserveBookDialogVisible: false,
       newPassword: ''
@@ -165,6 +191,7 @@ export default {
         await axios.delete(`http://localhost:5000/api/shopping_cart/${userId}/${bookId}`);
         this.borrowingLists = this.borrowingLists.filter(record => record.book_id !== bookId);
         this.$message.success('Book removed from borrowing list successfully!');
+        this.fetchBorrowingLists();
       } catch (error) {
         console.error('Error removing book from borrowing list:', error);
         this.$message.error('Failed to remove book. Please try again.');
@@ -228,6 +255,38 @@ export default {
         this.$message.error(error.response.data.error);
       }
     },
+    async reserveBook(book_id) {
+      try {
+        const userId = localStorage.getItem('currentUserId');
+        await axios.post('http://localhost:5000/api/reservations', { user_id: userId, book_id: book_id });
+        this.$message.success('Book reserved successfully!');
+        this.deleteBook(book_id);
+        this.fetchResv();
+      } catch (error) {
+        this.$message.error(error.response.data.message);
+      }
+    },
+    async fetchResv() {
+      try {
+        const userId = localStorage.getItem('currentUserId');
+        if (!userId) {
+          this.reservationInfo = 'Not logged in yet, please Login first.';
+        }
+        const response = await axios.get(`http://localhost:5000/api/reservations/user/${userId}`);
+        this.reservations = response.data;
+      } catch (error) {
+        console.error('Error fetching reservation lists:', error);
+      }
+    },
+    async cancelResv(resv_id) {
+      try {
+        await axios.delete(`http://localhost:5000/api/reservations/${resv_id}`);
+        this.$message.success('Reservation canceled successfully!');
+        this.fetchResv();
+      } catch (error) {
+        this.$message.error('Failed to cancel reservation. Please try again.');
+      }
+    },
     logout() {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('currentUserId');
@@ -239,6 +298,7 @@ export default {
   mounted() {
     this.fetchBorrowingLists();
     this.fetchBorrowingRecords();
+    this.fetchResv();
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
       this.currentUser = currentUser;

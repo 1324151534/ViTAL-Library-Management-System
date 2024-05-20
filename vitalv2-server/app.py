@@ -79,6 +79,22 @@ class Admins(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
+class Reservations(db.Model):
+    __tablename__ = 'reservations'
+
+    reservation_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.book_id'), nullable=False)
+    reservation_date = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    def serialize(self):
+        return {
+            'reservation_id': self.reservation_id,
+            'user_id': self.user_id,
+            'book_id': self.book_id,
+            'reservation_date': self.reservation_date.isoformat() if self.reservation_date else None
+        }
+
 # 创建数据库和表
 with app.app_context():
     db.create_all()
@@ -408,6 +424,82 @@ def get_user_borrowing_records(user_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# 创建新的预定记录
+@app.route('/api/reservations', methods=['POST'])
+def create_reservation():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+
+    if user_id and book_id:
+        # 检查是否已预定该书
+        existing_reservation = Reservations.query.filter_by(user_id=user_id, book_id=book_id).first()
+        if existing_reservation:
+            return jsonify({'message': 'Book already reserved'}), 400
+        else:
+            new_reservation = Reservations(user_id=user_id, book_id=book_id)
+            try:
+                db.session.add(new_reservation)
+                db.session.commit()
+                return jsonify({'message': 'Reservation created successfully!'}), 201
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Invalid user ID or book ID'}), 400
+
+# 删除预定记录
+@app.route('/api/reservations/<int:reservation_id>', methods=['DELETE'])
+def delete_reservation(reservation_id):
+    try:
+        reservation = Reservations.query.get(reservation_id)
+        if reservation:
+            db.session.delete(reservation)
+            db.session.commit()
+            return jsonify({'message': 'Reservation deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Reservation not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+    
+# 查询用户的预定记录
+@app.route('/api/reservations/user/<int:user_id>', methods=['GET'])
+def get_user_reservations(user_id):
+    reservations = Reservations.query.filter_by(user_id=user_id).all()
+    if reservations:
+        records = []
+        for record in reservations:
+            book = Books.query.get(record.book_id)
+            if book:
+                book_info = {
+                    'reservation_id': record.reservation_id,
+                    'book_id': book.book_id,
+                    'title': book.title,
+                    'author': book.author,
+                    'quantity': book.quantity,
+                    'reservation_date': record.reservation_date.isoformat() if record.reservation_date else None
+                }
+                records.append(book_info)
+        return jsonify(records), 200
+    else:
+        return jsonify({'message': 'No reservations found for this user'}), 404
+
+# 检查用户是否预定了某一本书
+@app.route('/api/reservations/check', methods=['POST'])
+def check_reservation():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    book_id = data.get('book_id')
+
+    if user_id and book_id:
+        reservation = Reservations.query.filter_by(user_id=user_id, book_id=book_id).first()
+        if reservation:
+            return jsonify({'reserved': True, 'reservation_id': reservation.reservation_id}), 200
+        else:
+            return jsonify({'reserved': False}), 200
+    else:
+        return jsonify({'error': 'Invalid user ID or book ID'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

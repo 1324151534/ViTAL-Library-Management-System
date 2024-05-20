@@ -44,11 +44,12 @@
                 <el-input v-model="searchUser" placeholder="Search Users" @input="fetchUsers"></el-input>
             </div>
             <el-table :data="users" style="width: 100%" empty-text="No User Available">
-                <el-table-column min-width="30%" prop="username" label="Username"></el-table-column>
-                <el-table-column min-width="70%">
+                <el-table-column min-width="15%" prop="username" label="Username"></el-table-column>
+                <el-table-column min-width="85%">
                     <template slot-scope="scope">
                         <el-button @click="viewBorrowingRecords(scope.row.id)">View Borrowing Records</el-button>
                         <el-button @click="viewShoppingCart(scope.row.id)">View Borrowing List</el-button>
+                        <el-button @click="viewReservations(scope.row.id)">View Reservations</el-button>
                         <el-button @click="sendNotification(scope.row.id)">Send Notification</el-button>
                     </template>
                 </el-table-column>
@@ -156,6 +157,19 @@
                 <el-button @click="borrowingRecordsDialogVisible = false">Close</el-button>
             </div>
         </el-dialog>
+
+        <!-- User Reservations Dialog -->
+        <el-dialog title="User Reservations" :visible.sync="reservationsDialogVisible">
+            <el-table :data="userReservations" style="width: 100%">
+                <el-table-column min-width="60%" prop="title" label="Title"></el-table-column>
+                <el-table-column min-width="30%" prop="author" label="Author"></el-table-column>
+                <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
+                <el-table-column min-width="60%" prop="reservation_date" label="Resv Date"></el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="reservationsDialogVisible = false">Close</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -173,8 +187,10 @@ export default {
             addBookDialogVisible: false,
             shoppingCartDialogVisible: false,
             borrowingRecordsDialogVisible: false,
+            reservationsDialogVisible: false,
             userShoppingCart: [],
             userBorrowingList: [],
+            userReservations: [],
             currentAdminId: null,
             currentAdminName: null,
             editBookForm: {
@@ -300,6 +316,21 @@ export default {
                 console.error('Error fetching user Borrowing Record:', error);
             }
         },
+        async viewReservations(userId) {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/reservations/user/${userId}`);
+                if (response.data.length > 0) {
+                    this.userReservations = response.data;
+                    this.reservationsDialogVisible = true;
+                }
+                else {
+                    this.$message.error('User Reservation is Empty.');
+                }
+            } catch (error) {
+                this.$message.error('Error fetching user Reservations.');
+                console.error('Error fetching user Reservations:', error);
+            }
+        },
         async viewShoppingCart(userId) {
             try {
                 const response = await axios.get(`http://localhost:5000/api/shopping_cart/${userId}`);
@@ -358,9 +389,9 @@ export default {
 }
 
 .manage-section {
-    width: 75%;
+    width: 80%;
     min-width: 400px;
-    max-width: 800px;
+    max-width: 900px;
     margin: auto;
     margin-bottom: 40px;
 }
