@@ -1,6 +1,6 @@
 <template>
     <div class="login-container">
-      <h2>Admin Login</h2>
+      <h2>ViTAL Librarian Login</h2>
       <el-form :model="loginForm" ref="loginForm" :rules="rules" label-width="100px">
         <el-form-item label="Username" prop="username">
           <el-input v-model="loginForm.username" auto-complete="off"></el-input>

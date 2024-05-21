@@ -483,7 +483,7 @@ def get_user_reservations(user_id):
                 records.append(book_info)
         return jsonify(records), 200
     else:
-        return jsonify({'message': 'No reservations found for this user'}), 404
+        return jsonify({'message': 'No reservations found for this user'}), 201
 
 # 检查用户是否预定了某一本书
 @app.route('/api/reservations/check', methods=['POST'])

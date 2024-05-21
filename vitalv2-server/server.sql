@@ -64,3 +64,35 @@ CREATE TABLE admins (
     username VARCHAR(50) UNIQUE NOT NULL,
     password TEXT NOT NULL
 );
+
+CREATE TABLE shopping_cart (
+    user_id INT NOT NULL,
+    book_id INT NOT NULL,
+    PRIMARY KEY (user_id, book_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
+
+-- 创建 reservations 表
+CREATE TABLE reservations (
+    reservation_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    book_id INTEGER NOT NULL,
+    reservation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
+
+-- 确保 reservation_date 在插入时自动填充当前时间
+CREATE OR REPLACE FUNCTION set_reservation_date()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.reservation_date = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_reservations
+BEFORE INSERT ON reservations
+FOR EACH ROW
+EXECUTE FUNCTION set_reservation_date();

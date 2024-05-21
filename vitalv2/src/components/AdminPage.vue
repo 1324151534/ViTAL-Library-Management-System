@@ -145,10 +145,10 @@
         </el-dialog>
 
         <!-- User Borrowing Records Dialog -->
-        <el-dialog title="User Borrowing Records" :visible.sync="borrowingRecordsDialogVisible">
+        <el-dialog title="User Borrowing Records" :visible.sync="borrowingRecordsDialogVisible" width="75%">
             <el-table :data="userBorrowingList" style="width: 100%">
-                <el-table-column min-width="60%" prop="title" label="Title"></el-table-column>
-                <el-table-column min-width="30%" prop="author" label="Author"></el-table-column>
+                <el-table-column min-width="55%" prop="title" label="Title"></el-table-column>
+                <el-table-column min-width="40%" prop="author" label="Author"></el-table-column>
                 <el-table-column min-width="60%" prop="borrow_date" label="Borrow from"></el-table-column>
                 <el-table-column min-width="60%" prop="return_date" label="Due to"></el-table-column>
                 <el-table-column min-width="30%" prop="extension_count" label="Renewed"></el-table-column>
@@ -161,7 +161,7 @@
         <!-- User Reservations Dialog -->
         <el-dialog title="User Reservations" :visible.sync="reservationsDialogVisible">
             <el-table :data="userReservations" style="width: 100%">
-                <el-table-column min-width="60%" prop="title" label="Title"></el-table-column>
+                <el-table-column min-width="70%" prop="title" label="Title"></el-table-column>
                 <el-table-column min-width="30%" prop="author" label="Author"></el-table-column>
                 <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
                 <el-table-column min-width="60%" prop="reservation_date" label="Resv Date"></el-table-column>
