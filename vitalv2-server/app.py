@@ -63,6 +63,7 @@ class BorrowingRecord(db.Model):
     borrow_date = db.Column(db.DateTime, default=datetime.utcnow)
     return_date = db.Column(db.DateTime, nullable=True)
     extension_count = db.Column(db.Integer, default=0)
+    is_returning = db.Column(db.Boolean, default=False)
     
     def serialize(self):
         return {
@@ -71,7 +72,8 @@ class BorrowingRecord(db.Model):
             'book_id': self.book_id,
             'borrow_date': self.borrow_date.isoformat() if self.borrow_date else None,
             'return_date': self.return_date.isoformat() if self.return_date else None,
-            'extension_count': self.extension_count
+            'extension_count': self.extension_count,
+            'is_returning': self.is_returning
         }
         
 class Admins(db.Model):
@@ -363,6 +365,42 @@ def create_borrowing_record():
     else:
         return jsonify({'error': f'Book {book_title} is not available for borrowing'}), 200
 
+# 请求还书
+@app.route('/api/borrowing_records/user_return', methods=['POST'])
+def user_return_borrowing_record():
+    data = request.get_json()
+    record_id = data.get('record_id')
+    record = BorrowingRecord.query.get(record_id)
+    if record:
+            try:
+                if record.is_returning == False:
+                    record.is_returning = True
+                db.session.commit()
+                return jsonify({'message': 'Requesting Return Book'}), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Record not found'}), 404
+    
+# 取消请求还书
+@app.route('/api/borrowing_records/cancel_user_return', methods=['POST'])
+def cancel_user_return_borrowing_record():
+    data = request.get_json()
+    record_id = data.get('record_id')
+    record = BorrowingRecord.query.get(record_id)
+    if record:
+            try:
+                if record.is_returning == True:
+                    record.is_returning = False
+                db.session.commit()
+                return jsonify({'message': 'Canceled Requesting Return Book'}), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Record not found'}), 404
+
 # 删除借书记录
 @app.route('/api/borrowing_records/<int:record_id>', methods=['DELETE'])
 def delete_borrowing_record(record_id):
@@ -417,9 +455,35 @@ def get_user_borrowing_records(user_id):
                     'location': book.location,
                     'borrow_date': record.borrow_date.isoformat() if record.borrow_date else None,
                     'return_date': record.return_date.isoformat() if record.return_date else None,
-                    'extension_count': record.extension_count
+                    'extension_count': record.extension_count,
+                    'is_returning': record.is_returning
                 }
                 records.append(book_info)
+        return jsonify(records), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# 所有的还书请求
+@app.route('/api/user_borrowing_records/requests', methods=['GET'])
+def get_user_requests_records():
+    try:
+        user_borrowing_records = BorrowingRecord.query.filter_by(is_returning=True).all()
+        records = []
+        for record in user_borrowing_records:
+            book = Books.query.get(record.book_id)
+            user = Users.query.get(record.user_id)
+            if book and user:
+                append_info = {
+                    'record_id': record.record_id,
+                    'username': user.username,
+                    'title': book.title,
+                    'author': book.author,
+                    'location': book.location,
+                    'borrow_date': record.borrow_date.isoformat() if record.borrow_date else None,
+                    'return_date': record.return_date.isoformat() if record.return_date else None,
+                    'extension_count': record.extension_count
+                }
+                records.append(append_info)
         return jsonify(records), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

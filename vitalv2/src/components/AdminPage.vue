@@ -37,6 +37,27 @@
             <h3>Please contant server admin if you have questions.</h3>
         </div>
 
+        <!-- Manage Return Book Request Section -->
+        <div v-if="currentAdminId" class="manage-section">
+            <h2>Manage Return Book Requests</h2>
+            <el-table :data="requests" style="width: 100%" empty-text="No Request Available">
+                <el-table-column min-width="30%" prop="record_id" label="Record ID"></el-table-column>
+                <el-table-column min-width="40%" prop="title" label="Book Title"></el-table-column>
+                <el-table-column min-width="30%" prop="username" label="Username"></el-table-column>
+                <el-table-column min-width="40%">
+                    <template slot-scope="scope">
+                        <el-button type="success" @click="confirmReturn(scope.row.record_id)">Confirm</el-button>
+                        <el-button type="danger" @click="refuseReturn(scope.row.record_id)">Refuse</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+
+        <div v-else class="manage-section">
+            <h2>Librarian Account Needed.</h2>
+            <h3>Please contant server admin if you have questions.</h3>
+        </div>
+
         <!-- Manage Users Section -->
         <div v-if="currentAdminId" class="manage-section">
             <h2>Manage Users</h2>
@@ -180,6 +201,7 @@ export default {
     data() {
         return {
             books: [],
+            requests: [],
             users: [],
             searchBook: '',
             searchUser: '',
@@ -233,6 +255,14 @@ export default {
                 console.error('Error fetching books:', error);
             }
         },
+        async fetchRequests() {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/user_borrowing_records/requests`);
+                this.requests = response.data;
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        },
         async fetchUsers() {
             try {
                 const response = await axios.get(`http://localhost:5000/api/users?search=${this.searchUser}`);
@@ -241,7 +271,25 @@ export default {
                 console.error('Error fetching users:', error);
             }
         },
-
+        async confirmReturn(record_id) {
+            try {
+                await axios.delete(`http://localhost:5000/api/borrowing_records/${record_id}`);
+                this.fetchRequests();
+                this.$message.success('Book returned successfully!');
+            } catch (error) {
+                this.$message.error('Failed to return book.');
+            }
+        },
+        async refuseReturn(record_id) {
+            try {
+                const data = { record_id: record_id };
+                await axios.post(`http://localhost:5000/api/borrowing_records/cancel_user_return`, data);
+                this.fetchRequests();
+                this.$message.success('Book return request canceled successfully!');
+            } catch (error) {
+                this.$message.error('Failed to cancel book return.');
+            }
+        },
         editBook(book) {
             this.editBookForm = { ...book, published_date: book.published_date ? new Date(book.published_date) : null };
             this.editBookDialogVisible = true;
@@ -360,6 +408,7 @@ export default {
     mounted() {
         this.fetchBooks();
         this.fetchUsers();
+        this.fetchRequests();
     }
 };
 </script>

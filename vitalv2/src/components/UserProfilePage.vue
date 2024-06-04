@@ -59,10 +59,12 @@
           </div>
           <div class="button-container">
             <el-tooltip content="You can renew 3 times, 30 days each time, for each book." placement="top">
-              <el-button style="width: 125px; height: 45px; border-radius: 100px;" type="primary" icon="el-icon-refresh"
+              <el-button style="width: 180px; height: 45px; border-radius: 100px;" type="primary" icon="el-icon-refresh"
                 @click="renewBook(record.record_id)" plain>Renew</el-button>
             </el-tooltip>
-            <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+            <el-button v-if="record.is_returning == true" style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+              type="warning" icon="el-icon-refresh-left" @click="cancelReturnBook(record.record_id)">Cancel Return</el-button>
+            <el-button v-else style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
               type="primary" icon="el-icon-refresh-left" @click="returnBook(record.record_id)">Return</el-button>
           </div>
         </li>
@@ -152,6 +154,7 @@ export default {
         }
         const response = await axios.get(`http://localhost:5000/api/user_borrowing_records/${userId}`);
         this.borrowingRecords = response.data;
+        console.log(this.borrowingRecords)
       } catch (error) {
         console.error('Error fetching borrowing records:', error);
       }
@@ -197,7 +200,27 @@ export default {
         this.$message.error('Failed to remove book. Please try again.');
       }
     },
+    async cancelReturnBook(record_id) {
+      try {
+        const data = { record_id: record_id };
+        await axios.post(`http://localhost:5000/api/borrowing_records/cancel_user_return`, data);
+        this.fetchBorrowingRecords();
+        this.$message.success('Book return request canceled successfully!');
+      } catch (error) {
+        this.$message.error('Failed to cancel book return.');
+      }
+    },
     async returnBook(record_id) {
+      try {
+        const data = { record_id: record_id };
+        await axios.post(`http://localhost:5000/api/borrowing_records/user_return`, data);
+        this.fetchBorrowingRecords();
+        this.$message.success('Book return request created successfully!');
+      } catch (error) {
+        this.$message.error('Failed to return book.');
+      }
+    },
+    async deleteRecord(record_id) {
       try {
         await axios.delete(`http://localhost:5000/api/borrowing_records/${record_id}`);
         this.fetchBorrowingRecords();
