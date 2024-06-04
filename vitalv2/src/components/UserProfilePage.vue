@@ -72,7 +72,7 @@
     <!-- Reservation Table -->
     <div class="borrowing-records">
       <h2>{{ reservationInfo }}</h2>
-      <ul v-if="currentUser">
+      <ul v-if="currentUser && reservations.length > 0">
         <li v-for="record in reservations" :key="record.reservation_id" class="record-item">
           <div class="book-container">
             <p class="rec-title">{{ record.title }}</p>
