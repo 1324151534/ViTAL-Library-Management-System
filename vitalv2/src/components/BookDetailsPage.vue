@@ -2,7 +2,8 @@
     <div class="book-detail-container">
         <!-- Header Section -->
         <header class="header">
-            <h1 style="display: flex;">ViTAL LMS <span style="margin-left: 10px; color: gray; font-weight: lighter;">BOOK DETAIL</span></h1>
+            <h1 style="display: flex;">ViTAL LMS <span
+                    style="margin-left: 10px; color: gray; font-weight: lighter;">BOOK DETAIL</span></h1>
             <div class="user-container">
                 <span style="margin-right: 20px;" v-if="currentUser" class="user-info">Welcome, {{ currentUser }}</span>
                 <el-button v-if="currentUser" type="primary" @click="goToUserProfile">My Profile</el-button>
@@ -12,7 +13,8 @@
 
         <!-- Book Details Section -->
         <div class="book-details-container">
-            <el-button icon="el-icon-arrow-left" style="font-size: larger;" type="text" class="returnBooklist" @click="goToBookList">Return Booklist</el-button>
+            <el-button icon="el-icon-arrow-left" style="font-size: larger;" type="text" class="returnBooklist"
+                @click="goToBookList">Return Booklist</el-button>
             <h1>
                 {{ book.title }}
             </h1>
@@ -20,9 +22,10 @@
             <div class="details">
                 <div class="image">
                     <img :src="book.cover_image" alt="Book Cover">
-                    <el-button style="margin-top: 20px;" type="primary" icon="el-icon-circle-plus" @click="addToBorrowingList">Add to Borrowing List</el-button>
+                    <el-button style="margin-top: 20px;" type="primary" icon="el-icon-circle-plus"
+                        @click="addToBorrowingList">Add to Borrowing List</el-button>
                 </div>
-                
+
                 <div class="info">
                     <p><strong>Author:</strong> {{ book.author }}</p>
                     <p><strong>Type:</strong> {{ book.type }}</p>
@@ -132,8 +135,11 @@ export default {
                 // 在这里实现跳转到登录页面的逻辑
             }
         },
+        goToLogin() {
+            this.$router.push({ name: 'Login' });
+        },
         goToUserProfile() {
-            this.$router.push({ name: 'UserProfile'});
+            this.$router.push({ name: 'UserProfile' });
         }
     },
     watch: {

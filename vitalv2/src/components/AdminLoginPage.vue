@@ -42,7 +42,7 @@
             try {
               const response = await axios.post('http://localhost:5000/admin/login', this.loginForm);
               localStorage.setItem('currentAdminUsername', JSON.stringify(response.data.username));
-              localStorage.setItem('currentAdminId', JSON.stringify(response.data.adminId));
+              localStorage.setItem('currentAdminId', JSON.stringify(response.data.userId));
               this.$notify({
                 title: 'Success',
                 message: 'Login successful',

@@ -82,29 +82,35 @@ export default {
   background-color: #ffffff;
   border-radius: 8px;
 }
+
 h2 {
   text-align: center;
   margin-bottom: 30px;
   font-size: 24px;
   color: #333;
 }
+
 .el-form-item {
   margin-bottom: 20px;
 }
+
 .login-button {
   width: 100%;
   margin-bottom: 10px;
 }
+
 .register-button {
   width: 100%;
   background-color: #42b983;
   color: #fff;
   border-color: #42b983;
 }
+
 .register-button:hover {
   background-color: #3a9d72;
   border-color: #3a9d72;
 }
+
 .el-button {
   width: 45%;
 }

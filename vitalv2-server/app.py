@@ -81,6 +81,17 @@ class Admins(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
+class Notifications(db.Model):
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
+    notification_date = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+    notification_text = db.Column(db.Text, nullable=False)
+    notification_state = db.Column(db.Integer, default=0) # 0: Sent 1: Received
+    notification_level = db.Column(db.Text, nullable=False, default="warning")
+
 class Reservations(db.Model):
     __tablename__ = 'reservations'
 
@@ -564,6 +575,78 @@ def check_reservation():
             return jsonify({'reserved': False}), 200
     else:
         return jsonify({'error': 'Invalid user ID or book ID'}), 400
+    
+# Send Notifications
+@app.route('/api/notifications', methods=['POST'])
+def send_notification():
+    data = request.get_json()
+    new_notification = Notifications(
+        user_id=data['user_id'],
+        admin_id=data['admin_id'],
+        notification_text=data['notification_text'],
+        notification_level=data['notification_level']
+    )
+    db.session.add(new_notification)
+    db.session.commit()
+    return jsonify({'message': 'Notification sent!'}), 201   
+ 
+# Get Notifications
+@app.route('/api/notifications', methods=['GET'])
+def get_notification():
+    user_id = request.args.get('user_id')
+    notifications = []
+    if user_id:
+        notifications = Notifications.query.filter(
+            (Notifications.user_id == user_id)
+        ).all()
+    else:
+        notifications = Notifications.query.all()
+
+    notification_list = []
+
+    for notification in notifications:
+        admin = Admins.query.get(notification.admin_id)
+        user = Users.query.get(notification.user_id)
+        if admin and user:
+            append_info = {
+                'id': notification.id,
+                'user_username': user.username,
+                'admin_username': admin.username,
+                'notification_text': notification.notification_text,
+                'notification_state': 'Sent' if notification.notification_state == 0 else 'Received',
+                'notification_level': notification.notification_level,
+                'notification_date': notification.notification_date.isoformat() if notification.notification_date else None,
+            }
+            notification_list.append(append_info)
+    return jsonify(notification_list), 200   
+
+# Delete Notification
+@app.route('/api/notifications/<int:notification_id>', methods=['DELETE'])
+def delete_notification(notification_id):
+    try:
+        notification = Notifications.query.get(notification_id)
+        if notification:
+            db.session.delete(notification)
+            db.session.commit()
+            return jsonify({'message': 'Notification deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Notification not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 400
+
+# Read Notification
+@app.route('/api/notifications/<int:notification_id>', methods=['GET'])
+def read_notification(notification_id):
+    notification = Notifications.query.get(notification_id)
+    if notification and notification.notification_state == 0:
+        notification.notification_state = 1
+        db.session.commit()
+        if notification.notification_level == 'warning':
+            delete_notification(notification_id)
+        return jsonify({'message': 'Notification read successfully!'}), 200
+    else:
+        return jsonify({'error': 'Danger notification cannot be dismissed.'}), 404
 
 # Dashboard
 @app.route('/api/server/status', methods=['GET'])

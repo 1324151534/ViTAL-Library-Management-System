@@ -6,14 +6,16 @@
             <div class="user-container">
                 <p v-if="currentAdminId" class="admin-top">Welcome, {{ currentAdminName }}</p>
                 <p v-else class="admin-top">Please login first.</p>
-                <el-button type="danger" class="admin-top logout-btn" v-if="currentAdminId" @click="logout">Logout</el-button>
+                <el-button type="danger" class="admin-top logout-btn" v-if="currentAdminId"
+                    @click="logout">Logout</el-button>
             </div>
         </header>
 
 
         <!-- Manage Books Section -->
         <div v-if="currentAdminId" class="manage-section first-section">
-            <el-button icon="el-icon-arrow-left" type="text" class="enterDashboard" @click="enterDashboard">Return Dashboard</el-button>
+            <el-button icon="el-icon-arrow-left" type="text" class="enterDashboard" @click="enterDashboard">Return
+                Dashboard</el-button>
             <h2>Manage Books</h2>
             <div class="search-add-container">
                 <el-input v-model="searchBook" placeholder="Search Books" @input="fetchBooks"></el-input>
@@ -62,17 +64,19 @@
         <!-- Manage Users Section -->
         <div v-if="currentAdminId" class="manage-section">
             <h2>Manage Users</h2>
-            <div class="search-container">
+            <div class="search-add-container">
                 <el-input v-model="searchUser" placeholder="Search Users" @input="fetchUsers"></el-input>
+                <el-button type="primary" style="margin-left: 10px;" @click="openSendNotification()">Send
+                    Notification</el-button>
             </div>
             <el-table :data="users" style="width: 100%" empty-text="No User Available">
-                <el-table-column min-width="15%" prop="username" label="Username"></el-table-column>
-                <el-table-column min-width="85%">
+                <el-table-column min-width="20%" prop="username" label="Username"></el-table-column>
+                <el-table-column min-width="80%">
                     <template slot-scope="scope">
                         <el-button @click="viewBorrowingRecords(scope.row.id)">View Borrowing Records</el-button>
                         <el-button @click="viewShoppingCart(scope.row.id)">View Borrowing List</el-button>
                         <el-button @click="viewReservations(scope.row.id)">View Reservations</el-button>
-                        <el-button @click="sendNotification(scope.row.id)">Send Notification</el-button>
+                        <el-button @click="viewNotifications(scope.row.id)">View Notifications</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -192,6 +196,63 @@
                 <el-button @click="reservationsDialogVisible = false">Close</el-button>
             </div>
         </el-dialog>
+
+        <!-- User Notification Dialog -->
+        <el-dialog title="User Notifications" :visible.sync="notificationDialogVisible" width="75%">
+            <el-table :data="userNotifications" style="width: 100%">
+                <el-table-column min-width="40%" prop="user_username" label="User"></el-table-column>
+                <el-table-column min-width="30%" prop="admin_username" label="Librarian"></el-table-column>
+                <el-table-column min-width="20%" prop="notification_state" label="State"></el-table-column>
+                <el-table-column min-width="30%" prop="notification_level" label="Level"></el-table-column>
+                <el-table-column min-width="60%" prop="notification_date" label="Date"></el-table-column>
+                <el-table-column min-width="50%">
+                    <template slot-scope="scope">
+                        <el-button @click="viewText(scope.row.id)">View Text</el-button>
+                        <el-button type="danger" @click="deleteNotification(scope.row.id)">Delete</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="notificationDialogVisible = false">Close</el-button>
+            </div>
+        </el-dialog>
+
+        <!-- User Notification Text Dialog -->
+        <el-dialog title="User Notification Text" :visible.sync="notificationTextDialogVisible">
+            <div class="text-area">{{ notificationText }}</div>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="notificationTextDialogVisible = false; notificationText = 'No Text';">Close</el-button>
+            </div>
+        </el-dialog>
+
+        <!-- Send Notification Dialog -->
+        <el-dialog title="Send Notification" :visible.sync="sendNotificationDialogVisible">
+            <el-form :model="sendNotificationForm">
+                <el-form-item label="">
+                    <el-table :data="users" style="width: 100%" empty-text="No User Available"
+                        @row-click="handleRowClick">
+                        <el-table-column min-width="25%" label="User ID">
+                            <template slot-scope="scope">
+                                <el-radio :label="scope.row.id" v-model="sendNotificationForm.user_id"
+                                    @change.native="getCurrentRow(scope.row)"></el-radio>
+                            </template>
+                        </el-table-column>
+                        <el-table-column min-width="75%" prop="username" label="Username"></el-table-column>
+                    </el-table>
+                </el-form-item>
+                <el-form-item label="Notification Text">
+                    <el-input type="textarea" v-model="sendNotificationForm.notification_text"></el-input>
+                </el-form-item>
+                <el-form-item label="Notification Level">
+                    <el-radio v-model="sendNotificationForm.notification_level" label="warning">Warning</el-radio>
+                    <el-radio v-model="sendNotificationForm.notification_level" label="danger">Danger</el-radio>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="sendNotificationDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="sendNotification">Send</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
@@ -211,11 +272,21 @@ export default {
             shoppingCartDialogVisible: false,
             borrowingRecordsDialogVisible: false,
             reservationsDialogVisible: false,
+            sendNotificationDialogVisible: false,
+            notificationDialogVisible: false,
+            notificationTextDialogVisible: false,
             userShoppingCart: [],
             userBorrowingList: [],
             userReservations: [],
+            userNotifications: [],
             currentAdminId: null,
             currentAdminName: null,
+            notificationText: 'No Text',
+            sendNotificationForm: {
+                user_id: '',
+                notification_text: '',
+                notification_level: 'warning'
+            },
             editBookForm: {
                 title: '',
                 author: '',
@@ -242,6 +313,9 @@ export default {
         };
     },
     methods: {
+        handleRowClick(row) {
+            this.sendNotificationForm.user_id = row.id;
+        },
         async fetchBooks() {
             const adminUsername = localStorage.getItem('currentAdminUsername');
             const adminId = localStorage.getItem('currentAdminId');
@@ -305,6 +379,16 @@ export default {
                 this.$message.error('Failed to delete book.');
             }
         },
+        async deleteNotification(noti_id) {
+            try {
+                await axios.delete(`http://localhost:5000/api/notifications/${noti_id}`);
+                this.notificationDialogVisible = false;
+                this.$message.success('Notification deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting notification:', error);
+                this.$message.error('Failed to delete notification.');
+            }
+        },
         async updateBook() {
             try {
                 await axios.put(`http://localhost:5000/api/books/${this.editBookForm.book_id}`, {
@@ -353,6 +437,21 @@ export default {
                 this.$message.error('Failed to add book.');
             }
         },
+        async sendNotification() {
+            try {
+                await axios.post(`http://localhost:5000/api/notifications`, {
+                    user_id: this.sendNotificationForm.user_id,
+                    admin_id: this.currentAdminId,
+                    notification_text: this.sendNotificationForm.notification_text,
+                    notification_level: this.sendNotificationForm.notification_level
+                });
+                this.sendNotificationDialogVisible = false;
+                this.$message.success('Notification sent successfully!');
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                this.$message.error('Failed to send notification.');
+            }
+        },
         async viewBorrowingRecords(userId) {
             try {
                 const response = await axios.get(`http://localhost:5000/api/user_borrowing_records/${userId}`);
@@ -398,9 +497,39 @@ export default {
                 console.error('Error fetching user Borrowing List:', error);
             }
         },
-        sendNotification(userId) {
-            console.log(userId);
-            // Implement sending notification
+        async viewNotifications(userId) {
+            try {
+                const response = await axios.get('http://localhost:5000/api/notifications', {
+                    params: {
+                        user_id: userId
+                    }
+                });                
+                if (response.data.length > 0) {
+                    this.userNotifications = response.data;
+                    this.notificationDialogVisible = true;
+                }
+                else {
+                    this.$message.error('User Notifications List is Empty.');
+                }
+            } catch (error) {
+                this.$message.error('Error fetching user Notifications.');
+                console.error('Error fetching user Notifications:', error);
+            }
+        },
+        async viewText(noti_id) {
+            this.notificationTextDialogVisible = true;
+            let i;
+            let noti_json = JSON.parse(JSON.stringify(this.userNotifications));
+            console.log(noti_json);
+            for (i = 0; i <  noti_json.length; ++i) {
+                if (noti_json[i].id == noti_id) {
+                    this.notificationText = noti_json[i].notification_text;
+                    break;
+                }
+            }
+        },
+        openSendNotification() {
+            this.sendNotificationDialogVisible = true;
         },
         logout() {
             localStorage.removeItem('currentAdminUsername');
@@ -421,6 +550,7 @@ export default {
 .first-section {
     padding-top: 170px;
 }
+
 .admin-top {
     font-size: larger;
     font-weight: lighter;

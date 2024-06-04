@@ -5,6 +5,9 @@
       <h1 @click="goToBookList">ViTAL LMS <span style="color: gray;" class="lightTitle">MY PROFILE</span></h1>
       <div class="user-container">
         <span v-if="currentUser" class="user-info">Welcome, {{ currentUser }}</span>
+        <el-tooltip v-if="currentUser" content="Notification Box" placement="top">
+          <el-button v-if="currentUser" @click="openNotificationBox" icon="el-icon-message-solid" circle></el-button>
+        </el-tooltip>
         <el-button v-if="currentUser" type="danger" @click="logout">Logout</el-button>
         <el-button v-else type="primary" @click="goToLogin">Login or Signup</el-button>
       </div>
@@ -12,7 +15,8 @@
 
 
     <div class="profile-container">
-      <el-button icon="el-icon-arrow-left" type="text" class="returnBooklist" @click="goToBookList">Return Booklist</el-button>
+      <el-button icon="el-icon-arrow-left" type="text" class="returnBooklist" @click="goToBookList">Return
+        Booklist</el-button>
 
       <!-- Borrowing List Section -->
       <div class="borrowing-records">
@@ -72,7 +76,7 @@
                 Return</el-button>
               <el-button v-else
                 style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
-                type="primary" icon="el-icon-refresh-left" @click="returnBook(record.record_id)">Return</el-button>
+                type="primary" icon="el-icon-refresh-left" @click="check_out(record.record_id)">Return</el-button>
             </div>
           </li>
         </ul>
@@ -131,6 +135,62 @@
         </div>
       </el-dialog>
 
+      <!-- User Notification Dialog -->
+      <el-dialog title="User Notifications" :visible.sync="notificationDialogVisible" width="75%">
+        <el-table :data="userNotifications" style="width: 100%" empty-text="No Notifications Available">
+          <el-table-column min-width="40%" prop="user_username" label="User"></el-table-column>
+          <el-table-column min-width="30%" prop="admin_username" label="Librarian"></el-table-column>
+          <el-table-column min-width="20%" prop="notification_state" label="State"></el-table-column>
+          <el-table-column min-width="30%" prop="notification_level" label="Level"></el-table-column>
+          <el-table-column min-width="60%" prop="notification_date" label="Date"></el-table-column>
+          <el-table-column min-width="50%">
+            <template slot-scope="scope">
+              <el-button @click="viewText(scope.row.id)">View Text</el-button>
+              <el-button type="success" @click="receiveNotification(scope.row.id)">Receive</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="notificationDialogVisible = false">Close</el-button>
+        </div>
+      </el-dialog>
+
+      <!-- User Notification Text Dialog -->
+      <el-dialog title="User Notification Text" :visible.sync="notificationTextDialogVisible">
+        <div class="text-area">{{ notificationText }}</div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="notificationTextDialogVisible = false; notificationText = 'No Text';">Close</el-button>
+        </div>
+      </el-dialog>
+
+      <!-- Checkout Dialog -->
+      <el-dialog title="Check-out" :visible.sync="checkoutDialogVisible">
+        <div class="check-container">
+          <div class="check-container-left">
+            <div class="check-bookname">{{ now_checking_book }}</div>
+            <div class="check-info">Warning: You have to return the book in 7 days, or your payment will refund.<br>(if your
+              book
+              isn't overdue)</div>
+            <div class="check-title">Borrowed From</div>
+            <div class="check-date">{{ now_checking_date }}</div>
+            <div class="check-title">You have borrowed</div>
+            <div class="check-date-count">{{ diff_days }} Days</div>
+            <div class="check-title">Remaining Time</div>
+            <div class="check-date-count">{{ remain_days }} Days</div>
+            <div class="check-title">Total Fee is</div>
+            <div class="check-fee-count">{{ fee }} $</div>
+          </div>
+          <div class="check-container-right">
+            <img ref="payment_img" src="http://localhost:5000/covers/AlipayPayment.png" alt="Payment QR Code">
+            <el-button @click="switch_payment">{{ payment_text }}</el-button>
+          </div>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="checkoutDialogVisible = false">Close</el-button>
+          <el-button type="primary" @click="returnBook(now_checking_id)">Pay</el-button>
+        </div>
+      </el-dialog>
+
     </div>
   </div>
 </template>
@@ -142,6 +202,7 @@ export default {
   data() {
     return {
       currentUser: null,
+      currentUserId: null,
       borrowingLists: [],
       BorrowingListInfo: 'Borrowing List',
       borrowingRecords: [],
@@ -150,10 +211,63 @@ export default {
       reservations: [],
       failedRecords: [],
       reserveBookDialogVisible: false,
-      newPassword: ''
+      checkoutDialogVisible: false,
+      newPassword: '',
+      notificationText: 'No Text',
+      notificationDialogVisible: false,
+      notificationTextDialogVisible: false,
+      userNotifications: [],
+      now_checking_id: null,
+      now_checking_book: 'BOOK TITLE',
+      now_checking_date: 'NO DATE',
+      payment_text: 'Use Wechat Pay',
+      diff_days: 0,
+      remain_days: 0,
+      fee: 0.5
     };
   },
   methods: {
+    check_out(record_id) {
+      this.now_checking_id = record_id;
+      let record_json = JSON.parse(JSON.stringify(this.borrowingRecords));
+      let i = 0;
+      let now_record = {};
+      for (i; i < record_json.length; ++i) {
+        if (record_json[i].record_id == record_id) {
+          now_record = record_json[i];
+          break;
+        }
+      }
+      this.now_checking_book = now_record.title;
+      let utc_time = (now_record.borrow_date.split('.')[0]).split('T');
+      let utc_return_time = (now_record.return_date.split('.')[0]).split('T');
+
+      this.now_checking_date = utc_time[0] + ' ' + utc_time[1];
+
+      let date = Date.parse(this.now_checking_date);
+      let ret_date = Date.parse(utc_return_time[0] + ' ' + utc_return_time[1])
+
+      let diffDate = Date.now() - date;
+      let diffRetDate = ret_date - Date.now();
+
+      this.diff_days = Math.floor(diffDate / (1000 * 3600 * 24));
+      this.remain_days = Math.floor(diffRetDate / (1000 * 3600 * 24));
+
+      this.checkoutDialogVisible = true;
+      this.fee = Math.max(0.3, 0.2 * (this.diff_days / 7));
+    },
+    switch_payment() {
+      if (this.payment_text == 'Use Wechat Pay') {
+        let img = this.$refs.payment_img;
+        img.src = 'http://localhost:5000/covers/WechatPayment.png'
+        this.payment_text = 'Use Alipay';
+      }
+      else {
+        let img = this.$refs.payment_img;
+        img.src = 'http://localhost:5000/covers/AlipayPayment.png'
+        this.payment_text = 'Use Wechat Pay';
+      }
+    },
     async fetchBorrowingRecords() {
       try {
         const userId = localStorage.getItem('currentUserId');
@@ -178,6 +292,49 @@ export default {
       } catch (error) {
         console.error('Error fetching borrowing lists:', error);
       }
+    },
+    async fetchNotifications() {
+      try {
+        let userId = this.currentUserId
+        const response = await axios.get('http://localhost:5000/api/notifications', {
+          params: {
+            user_id: userId
+          }
+        });
+        if (response.data.length > 0) {
+          this.userNotifications = response.data;
+          this.$message.info('You received a notification.');
+        }
+        else {
+          this.$message.success('You have no new notification now.');
+        }
+      } catch (error) {
+        this.$message.error('Error fetching user notifications.');
+        console.error('Error fetching user notifications:', error);
+      }
+    },
+    async viewText(noti_id) {
+      this.notificationTextDialogVisible = true;
+      let i;
+      let noti_json = JSON.parse(JSON.stringify(this.userNotifications));
+      console.log(noti_json);
+      for (i = 0; i < noti_json.length; ++i) {
+        if (noti_json[i].id == noti_id) {
+          this.notificationText = noti_json[i].notification_text;
+          break;
+        }
+      }
+    },
+    async receiveNotification(noti_id) {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/notifications/${noti_id}`);
+        this.$message.info(response.data.message);
+      } catch (error) {
+        this.$message.error(error.response.data.error);
+      }
+    },
+    openNotificationBox() {
+      this.notificationDialogVisible = true;
     },
     async changePassword() {
       try {
@@ -224,6 +381,7 @@ export default {
         await axios.post(`http://localhost:5000/api/borrowing_records/user_return`, data);
         this.fetchBorrowingRecords();
         this.$message.success('Book return request created successfully!');
+        this.checkoutDialogVisible = false;
       } catch (error) {
         this.$message.error('Failed to return book.');
       }
@@ -331,8 +489,11 @@ export default {
     this.fetchBorrowingRecords();
     this.fetchResv();
     const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
+    const currentUserId = localStorage.getItem('currentUserId');
+    if (currentUser && currentUserId) {
       this.currentUser = currentUser;
+      this.currentUserId = currentUserId;
+      this.fetchNotifications();
     }
   }
 };
@@ -476,6 +637,49 @@ ul {
 }
 
 .returnBooklist {
-    font-size: large;
+  font-size: large;
+}
+
+.check-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.check-bookname {
+  font-size: 40px;
+  font-weight: bolder;
+}
+
+.check-info {
+  font-weight: lighter;
+}
+
+.check-title {
+  font-size: 30px;
+  margin-top: 10px;
+}
+
+.check-date, .check-date-count {
+  font-size: 20px;
+}
+
+.check-fee-count {
+  font-size: 35px;
+  color: #881010;
+  flex: 1;
+}
+
+.check-container-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.check-container-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
 }
 </style>
