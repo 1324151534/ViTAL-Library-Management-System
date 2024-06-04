@@ -7,6 +7,7 @@ import BookDetailsPage from '@/components/BookDetailsPage.vue';
 import UserProfilePage from '@/components/UserProfilePage.vue';
 import AdminPage from '@/components/AdminPage.vue';
 import AdminLoginPage from '@/components/AdminLoginPage.vue';
+import AdminDashboard from '@/components/AdminDashboard.vue';
 
 Vue.use(VueRouter);
 
@@ -45,6 +46,11 @@ const routes = [
     path: '/admin/login',
     name: 'AdminLogin',
     component: AdminLoginPage
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboard
   }
 ];
 

@@ -565,5 +565,43 @@ def check_reservation():
     else:
         return jsonify({'error': 'Invalid user ID or book ID'}), 400
 
+# Dashboard
+@app.route('/api/server/status', methods=['GET'])
+def server_status():
+    # Placeholder for server status
+    server_status = True  # Assuming server is always online
+    return jsonify({'status': server_status}), 200
+
+@app.route('/api/user/count', methods=['GET'])
+def user_count():
+    # Fetch total user count from the database
+    total_users = Users.query.count()
+    return jsonify({'user_count': total_users}), 200
+
+@app.route('/api/statistics', methods=['GET'])
+def get_statistics():
+    # Fetch total books count
+    total_quantity = db.session.query(db.func.sum(Books.quantity)).scalar()
+    
+    # Fetch total borrowing records count
+    total_borrowing_records = BorrowingRecord.query.count()
+    
+    # Fetch total reservations count
+    total_reservations = Reservations.query.count()
+    
+    return jsonify({
+        'total_books': total_quantity,
+        'total_borrowing_records': total_borrowing_records,
+        'total_reservations': total_reservations
+    }), 200
+
+# 获取不同类型书籍的总数量
+@app.route('/api/book-categories/count', methods=['GET'])
+def get_book_categories_count():
+    book_categories_count = db.session.query(Books.type, db.func.sum(Books.quantity)).group_by(Books.type).all()
+    categories_data = [{'name': category[0], 'value': int(category[1])} for category in book_categories_count]
+    return jsonify(categories_data), 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)

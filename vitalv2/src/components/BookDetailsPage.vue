@@ -2,20 +2,27 @@
     <div class="book-detail-container">
         <!-- Header Section -->
         <header class="header">
-            <h1 @click="goToBookList">ViTAL LMS</h1>
+            <h1 style="display: flex;">ViTAL LMS <span style="margin-left: 10px; color: gray; font-weight: lighter;">BOOK DETAIL</span></h1>
             <div class="user-container">
-                <span v-if="currentUser" class="user-info">Welcome, </span>
-                <el-button type="text" @click="goToUserProfile">{{ currentUser }}</el-button>
+                <span style="margin-right: 20px;" v-if="currentUser" class="user-info">Welcome, {{ currentUser }}</span>
+                <el-button v-if="currentUser" type="primary" @click="goToUserProfile">My Profile</el-button>
+                <el-button v-else type="warning" @click="goToLogin">Login or Signup</el-button>
             </div>
         </header>
 
         <!-- Book Details Section -->
-        <div class="book-details">
-            <h1>{{ book.title }}</h1>
+        <div class="book-details-container">
+            <el-button icon="el-icon-arrow-left" style="font-size: larger;" type="text" class="returnBooklist" @click="goToBookList">Return Booklist</el-button>
+            <h1>
+                {{ book.title }}
+            </h1>
+
             <div class="details">
                 <div class="image">
                     <img :src="book.cover_image" alt="Book Cover">
+                    <el-button style="margin-top: 20px;" type="primary" icon="el-icon-circle-plus" @click="addToBorrowingList">Add to Borrowing List</el-button>
                 </div>
+                
                 <div class="info">
                     <p><strong>Author:</strong> {{ book.author }}</p>
                     <p><strong>Type:</strong> {{ book.type }}</p>
@@ -30,21 +37,15 @@
             </div>
         </div>
 
-        <!-- Button Section -->
-        <div class="button-section">
-            <el-button type="primary" @click="addToBorrowingList">Add to Borrowing List</el-button>
-            <el-button type="info" plain @click="goToBookList">Return to Book List</el-button>
-        </div>
-
         <!-- Recommendations Section -->
         <div class="recommendations">
             <h2>{{ recommendNotiText }}</h2>
-            <ul>
+            <ul class="recommendations-container">
                 <li v-for="rec in recommendations" :key="rec.book_id" class="book-item"
                     @click="viewBookDetails(rec.book_id)">
                     <img :src="rec.cover_image" alt="Book Cover" class="book-cover">
                     <div class="book-details">
-                        <h3>{{ rec.title }}</h3>
+                        <h3 style="text-wrap: nowrap;">{{ rec.title }}</h3>
                         <p><strong>Author:</strong> {{ rec.author }}</p>
                         <p><strong>Type:</strong> {{ rec.type }}</p>
                         <p><strong>ISBN:</strong> {{ rec.isbn }}</p>
@@ -151,18 +152,22 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background-color: #00000010;
+    padding: 40px;
+    background-color: #dbdbdb80;
+    backdrop-filter: blur(10px);
     color: #fff;
     position: relative;
     z-index: 999;
+    box-sizing: border-box;
+    width: 100%;
+    position: fixed;
+    top: 0;
 }
 
 .header h1 {
     margin: 0;
     font-size: 24px;
     color: #333;
-    width: 150px;
     cursor: pointer;
 }
 
@@ -176,6 +181,11 @@ export default {
         transform: translateY(-50px);
     }
 
+    25% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
     75% {
         transform: translateY(0px);
     }
@@ -185,10 +195,18 @@ export default {
     }
 }
 
+.book-details-container {
+    animation: bk-dtl-in 1s;
+    max-width: 900px;
+    margin: auto;
+    margin-top: 140px;
+    padding: 20px;
+}
+
 .book-details {
     animation: bk-dtl-in 1s;
     max-width: 800px;
-    margin: 0 auto;
+    margin: auto;
     padding: 20px;
 }
 
@@ -202,6 +220,9 @@ export default {
 
 .image {
     margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .image img {
@@ -214,15 +235,19 @@ export default {
 }
 
 .button-section {
-    margin-top: 20px;
     text-align: center;
+}
+
+.recommendations-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
 }
 
 .recommendations {
     margin-top: 40px;
-    width: 50%;
-    max-width: 600px;
-    min-width: 200px;
+    max-width: 1600px;
     margin: auto;
 }
 
@@ -242,10 +267,12 @@ export default {
     align-items: center;
     border: 1px solid #ddd;
     border-radius: 5px;
-    margin-bottom: 20px;
+    margin: 20px;
     padding: 20px;
     transition-duration: 0.2s;
     cursor: pointer;
+    flex: 1;
+    max-width: 25%;
 }
 
 .recommendations .book-item:hover {
@@ -258,6 +285,7 @@ export default {
 }
 
 .recommendations .book-cover {
+    animation: bk-dtl-in 1s;
     width: 80px;
     height: 120px;
     margin-right: 20px;
@@ -286,9 +314,5 @@ export default {
     margin-bottom: 5px;
     font-size: 14px;
     color: #666;
-}
-
-.user-container {
-    width: 150px;
 }
 </style>

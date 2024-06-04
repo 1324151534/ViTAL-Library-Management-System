@@ -1,16 +1,16 @@
 <template>
     <div class="book-list">
         <header class="header">
-            <h1>ViTAL LMS</h1>
+            <h1 style="display: flex;">ViTAL LMS <span style="margin-left: 10px; color: gray; font-weight: lighter;">BOOKLIST</span></h1>
             <!-- Search Bar -->
             <div class="search-container">
                 <el-input v-model="searchKeyword" placeholder="Enter keywords..." class="search-bar"></el-input>
                 <el-button type="primary" @click="searchBooks">Search</el-button>
             </div>
             <div class="user-container">
-                <span v-if="currentUser" class="user-info">Welcome, </span>
-                <el-button v-if="currentUser" type="text" @click="goToUserProfile">{{ currentUser }}</el-button>
-                <el-button v-else type="text" @click="goToLogin">Login or Signup</el-button>
+                <span style="margin-right: 20px;" v-if="currentUser" class="user-info">Welcome, {{ currentUser }}</span>
+                <el-button v-if="currentUser" type="primary" @click="goToUserProfile">My Profile</el-button>
+                <el-button v-else type="warning" @click="goToLogin">Login or Signup</el-button>
             </div>
         </header>
         <div class="book-container">
@@ -104,16 +104,20 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background-color: #00000010;
+    padding: 40px;
+    background-color: #dbdbdb80;
     color: #fff;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
 }
 
 .header h1 {
     margin: 0;
     font-size: 24px;
     color: #333;
-    width: 150px;
 }
 
 .user-info {
@@ -121,7 +125,7 @@ export default {
 }
 
 .book-container {
-    margin-top: 20px;
+    padding-top: 150px;
     max-width: 850px;
     margin: auto;
 }
@@ -205,6 +209,5 @@ export default {
     justify-content: center;
     align-items: center;
     height: 30px;
-    width: 150px;
 }
 </style>

@@ -6,13 +6,14 @@
             <div class="user-container">
                 <p v-if="currentAdminId" class="admin-top">Welcome, {{ currentAdminName }}</p>
                 <p v-else class="admin-top">Please login first.</p>
-                <el-button class="admin-top" v-if="currentAdminId" type="text" @click="logout">Logout</el-button>
+                <el-button type="danger" class="admin-top logout-btn" v-if="currentAdminId" @click="logout">Logout</el-button>
             </div>
         </header>
 
 
         <!-- Manage Books Section -->
-        <div v-if="currentAdminId" class="manage-section">
+        <div v-if="currentAdminId" class="manage-section first-section">
+            <el-button icon="el-icon-arrow-left" type="text" class="enterDashboard" @click="enterDashboard">Return Dashboard</el-button>
             <h2>Manage Books</h2>
             <div class="search-add-container">
                 <el-input v-model="searchBook" placeholder="Search Books" @input="fetchBooks"></el-input>
@@ -23,7 +24,7 @@
                 <el-table-column min-width="150%" prop="title" label="Title"></el-table-column>
                 <el-table-column min-width="80%" prop="author" label="Author"></el-table-column>
                 <el-table-column min-width="40%" prop="quantity" label="Quantity"></el-table-column>
-                <el-table-column min-width="100%">
+                <el-table-column min-width="75%">
                     <template slot-scope="scope">
                         <el-button @click="editBook(scope.row)">Edit</el-button>
                         <el-button type="danger" @click="delBook(scope.row)">Delete</el-button>
@@ -44,7 +45,7 @@
                 <el-table-column min-width="30%" prop="record_id" label="Record ID"></el-table-column>
                 <el-table-column min-width="40%" prop="title" label="Book Title"></el-table-column>
                 <el-table-column min-width="30%" prop="username" label="Username"></el-table-column>
-                <el-table-column min-width="40%">
+                <el-table-column min-width="30%">
                     <template slot-scope="scope">
                         <el-button type="success" @click="confirmReturn(scope.row.record_id)">Confirm</el-button>
                         <el-button type="danger" @click="refuseReturn(scope.row.record_id)">Refuse</el-button>
@@ -328,6 +329,9 @@ export default {
         openAddBookDialog() {
             this.addBookDialogVisible = true;
         },
+        enterDashboard() {
+            this.$router.push({ name: 'AdminDashboard' });
+        },
         async addBook() {
             try {
                 await axios.post(`http://localhost:5000/api/books`, {
@@ -399,7 +403,7 @@ export default {
             // Implement sending notification
         },
         logout() {
-            localStorage.removeItem('currentAdminUsername'); 
+            localStorage.removeItem('currentAdminUsername');
             localStorage.removeItem('currentAdminId');
             this.$router.push({ name: 'AdminLogin' });
             this.$message.info('Logged Out.');
@@ -414,6 +418,9 @@ export default {
 </script>
 
 <style scoped>
+.first-section {
+    padding-top: 170px;
+}
 .admin-top {
     font-size: larger;
     font-weight: lighter;
@@ -425,11 +432,15 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    background-color: rgb(245, 245, 245);
+    background-color: #dbdbdb80;
     width: 100%;
     padding: 40px;
     box-sizing: border-box;
     margin-bottom: 40px;
+    position: fixed;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    z-index: 999;
 }
 
 .user-container {
@@ -457,5 +468,18 @@ export default {
 
 .el-table {
     margin-bottom: 20px;
+}
+
+.pie-wrap {
+    width: 100%;
+    height: 400px;
+}
+
+.logout-btn {
+    margin-left: 20px;
+}
+
+.enterDashboard {
+    font-size: large;
 }
 </style>

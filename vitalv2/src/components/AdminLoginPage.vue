@@ -48,7 +48,7 @@
                 message: 'Login successful',
                 type: 'success',
               });
-              this.$router.push({ name: 'Admin' });
+              this.$router.push({ name: 'AdminDashboard' });
             } catch (error) {
               this.$notify.error({
                 title: 'Error',

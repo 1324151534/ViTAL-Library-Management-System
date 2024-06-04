@@ -1,129 +1,137 @@
 <template>
-  <div class="profile-container">
+  <div class="profile-page">
     <!-- Header Section -->
     <header class="header">
-      <h1 @click="goToBookList">My Profile</h1>
+      <h1 @click="goToBookList">ViTAL LMS <span style="color: gray;" class="lightTitle">MY PROFILE</span></h1>
       <div class="user-container">
         <span v-if="currentUser" class="user-info">Welcome, {{ currentUser }}</span>
-        <el-button v-if="currentUser" type="text" @click="logout">Logout</el-button>
-        <el-button v-else type="text" @click="goToLogin">Login or Signup</el-button>
+        <el-button v-if="currentUser" type="danger" @click="logout">Logout</el-button>
+        <el-button v-else type="primary" @click="goToLogin">Login or Signup</el-button>
       </div>
     </header>
 
-    <!-- Borrowing List Section -->
-    <div class="borrowing-records">
-      <h2>{{ BorrowingListInfo }}</h2>
-      <ul v-if="currentUser">
-        <li v-for="record in borrowingLists" :key="record.book_id" class="record-item">
-          <div class="book-container">
-            <p class="rec-title">{{ record.title }}</p>
-            <div class="book-info-container">
-              <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
-              <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
+
+    <div class="profile-container">
+      <el-button icon="el-icon-arrow-left" type="text" class="returnBooklist" @click="goToBookList">Return Booklist</el-button>
+
+      <!-- Borrowing List Section -->
+      <div class="borrowing-records">
+        <h2>{{ BorrowingListInfo }}</h2>
+        <ul v-if="currentUser">
+          <li v-for="record in borrowingLists" :key="record.book_id" class="record-item">
+            <div class="book-container">
+              <p class="rec-title">{{ record.title }}</p>
+              <div class="book-info-container">
+                <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
+                <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
+              </div>
             </div>
-          </div>
-          <div class="button-container-list">
-            <el-tooltip content="Reserve Book" placement="top">
-              <el-button v-if="record.quantity == 0" style="width: 55px; height: 55px;" type="warning"
-                icon="el-icon-time" @click="reserveBook(record.book_id)" circle></el-button>
-            </el-tooltip>
-            <el-tooltip content="Delete Book" placement="top">
-              <el-button style="width: 55px; height: 55px;" type="danger" icon="el-icon-delete"
-                @click="deleteBook(record.book_id)" circle></el-button>
-            </el-tooltip>
-          </div>
-        </li>
-      </ul>
-      <div v-if="currentUser" class="rec-ctrl-container">
-        <el-button type="primary" @click="borrowAllBooks">Borrow All</el-button>
-      </div>
-    </div>
-
-    <!-- Borrowing Record Table -->
-    <div class="borrowing-records">
-      <h2>{{ borrowingRecordInfo }}</h2>
-      <ul v-if="currentUser">
-        <li v-for="record in borrowingRecords" :key="record.record_id" class="record-item">
-          <div class="book-container">
-            <p class="rec-title">{{ record.title }}</p>
-            <el-tooltip content="If you have any question, please contant ViTAL librarian." placement="top-start">
-              <p class="rec-title-location"><span style="font-weight: normal; color: black;">Please fetch the book at
-                </span>{{ record.location }}</p>
-            </el-tooltip>
-            <div class="book-info-container-record">
-              <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
-              <div class="book-info"><strong>Borrowed from:</strong> {{ record.borrow_date }}</div>
-              <div class="book-info"><strong>Due to:</strong> {{ record.return_date }}</div>
-              <div class="book-info"><strong>Renewed:</strong> {{ record.extension_count }}</div>
+            <div class="button-container-list">
+              <el-tooltip content="Reserve Book" placement="top">
+                <el-button v-if="record.quantity == 0" style="width: 55px; height: 55px;" type="warning"
+                  icon="el-icon-time" @click="reserveBook(record.book_id)" circle></el-button>
+              </el-tooltip>
+              <el-tooltip content="Delete Book" placement="top">
+                <el-button style="width: 55px; height: 55px;" type="danger" icon="el-icon-delete"
+                  @click="deleteBook(record.book_id)" circle></el-button>
+              </el-tooltip>
             </div>
-          </div>
-          <div class="button-container">
-            <el-tooltip content="You can renew 3 times, 30 days each time, for each book." placement="top">
-              <el-button style="width: 180px; height: 45px; border-radius: 100px;" type="primary" icon="el-icon-refresh"
-                @click="renewBook(record.record_id)" plain>Renew</el-button>
-            </el-tooltip>
-            <el-button v-if="record.is_returning == true" style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
-              type="warning" icon="el-icon-refresh-left" @click="cancelReturnBook(record.record_id)">Cancel Return</el-button>
-            <el-button v-else style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
-              type="primary" icon="el-icon-refresh-left" @click="returnBook(record.record_id)">Return</el-button>
-          </div>
-        </li>
-      </ul>
-    </div>
+          </li>
+        </ul>
+        <div v-if="currentUser" class="rec-ctrl-container">
+          <el-button type="primary" @click="borrowAllBooks">Borrow All</el-button>
+        </div>
+      </div>
 
-    <!-- Reservation Table -->
-    <div class="borrowing-records">
-      <h2>{{ reservationInfo }}</h2>
-      <ul v-if="currentUser && reservations.length > 0">
-        <li v-for="record in reservations" :key="record.reservation_id" class="record-item">
-          <div class="book-container">
-            <p class="rec-title">{{ record.title }}</p>
-            <div class="book-info-container-record">
-              <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
-              <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
-              <div class="book-info"><strong>Reserve time:</strong> {{ record.reservation_date }}</div>
+      <!-- Borrowing Record Table -->
+      <div class="borrowing-records">
+        <h2>{{ borrowingRecordInfo }}</h2>
+        <ul v-if="currentUser">
+          <li v-for="record in borrowingRecords" :key="record.record_id" class="record-item">
+            <div class="book-container">
+              <p class="rec-title">{{ record.title }}</p>
+              <el-tooltip content="If you have any question, please contant ViTAL librarian." placement="top-start">
+                <p class="rec-title-location"><span style="font-weight: normal; color: black;">Please fetch the book at
+                  </span>{{ record.location }}</p>
+              </el-tooltip>
+              <div class="book-info-container-record">
+                <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
+                <div class="book-info"><strong>Borrowed from:</strong> {{ record.borrow_date }}</div>
+                <div class="book-info"><strong>Due to:</strong> {{ record.return_date }}</div>
+                <div class="book-info"><strong>Renewed:</strong> {{ record.extension_count }}</div>
+              </div>
             </div>
-          </div>
-          <div class="button-container">
-            <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
-              type="danger" icon="el-icon-close" @click="cancelResv(record.reservation_id)">Cancel</el-button>
-          </div>
-        </li>
-      </ul>
+            <div class="button-container">
+              <el-tooltip content="You can renew 3 times, 30 days each time, for each book." placement="top">
+                <el-button style="width: 180px; height: 45px; border-radius: 100px;" type="primary"
+                  icon="el-icon-refresh" @click="renewBook(record.record_id)" plain>Renew</el-button>
+              </el-tooltip>
+              <el-button v-if="record.is_returning == true"
+                style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+                type="warning" icon="el-icon-refresh-left" @click="cancelReturnBook(record.record_id)">Cancel
+                Return</el-button>
+              <el-button v-else
+                style="width: 180px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+                type="primary" icon="el-icon-refresh-left" @click="returnBook(record.record_id)">Return</el-button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Reservation Table -->
+      <div class="borrowing-records">
+        <h2>{{ reservationInfo }}</h2>
+        <ul v-if="currentUser && reservations.length > 0">
+          <li v-for="record in reservations" :key="record.reservation_id" class="record-item">
+            <div class="book-container">
+              <p class="rec-title">{{ record.title }}</p>
+              <div class="book-info-container-record">
+                <div class="book-info"><strong>Author:</strong> {{ record.author }}</div>
+                <div class="book-info"><strong>Quantity:</strong> {{ record.quantity }}</div>
+                <div class="book-info"><strong>Reserve time:</strong> {{ record.reservation_date }}</div>
+              </div>
+            </div>
+            <div class="button-container">
+              <el-button style="width: 125px; height: 45px; margin-left: 0px; margin-top: 10px; border-radius: 100px;"
+                type="danger" icon="el-icon-close" @click="cancelResv(record.reservation_id)">Cancel</el-button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Change Password Section -->
+      <h2 v-if="currentUser" style="font-size: 20px;">Change Password</h2>
+      <div v-if="currentUser" class="change-password">
+        <div class="password-input">
+          <el-input v-model="newPassword" type="password" placeholder="Enter new password"></el-input>
+        </div>
+        <div class="password-button">
+          <el-button type="primary" @click="changePassword">Change Password</el-button>
+        </div>
+      </div>
+
+      <!-- Failed Borrowing Records Dialog -->
+      <el-dialog title="User Reserve Lists" :visible.sync="reserveBookDialogVisible">
+        <el-table :data="failedRecords" style="width: 100%">
+          <el-table-column min-width="50%" prop="title" label="Title"></el-table-column>
+          <el-table-column min-width="20%" prop="author" label="Author"></el-table-column>
+          <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
+          <el-table-column min-width="10%" label="">
+            <template slot-scope="scope">
+              <el-tooltip content="Reserve Book" placement="top">
+                <el-button style="width: 50px; height: 50px;" type="warning" icon="el-icon-time"
+                  @click="reserveBook(scope.row.book_id)" circle>
+                </el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="reserveBookDialogVisible = false">Close</el-button>
+        </div>
+      </el-dialog>
+
     </div>
-
-    <!-- Change Password Section -->
-    <h2 v-if="currentUser" style="font-size: 20px;">Change Password</h2>
-    <div v-if="currentUser" class="change-password">
-      <div class="password-input">
-        <el-input v-model="newPassword" type="password" placeholder="Enter new password"></el-input>
-      </div>
-      <div class="password-button">
-        <el-button type="primary" @click="changePassword">Change Password</el-button>
-      </div>
-    </div>
-
-    <!-- Failed Borrowing Records Dialog -->
-    <el-dialog title="User Reserve Lists" :visible.sync="reserveBookDialogVisible">
-      <el-table :data="failedRecords" style="width: 100%">
-        <el-table-column min-width="50%" prop="title" label="Title"></el-table-column>
-        <el-table-column min-width="20%" prop="author" label="Author"></el-table-column>
-        <el-table-column min-width="20%" prop="quantity" label="Quantity"></el-table-column>
-        <el-table-column min-width="10%" label="">
-          <template slot-scope="scope">
-            <el-tooltip content="Reserve Book" placement="top">
-              <el-button style="width: 50px; height: 50px;" type="warning" icon="el-icon-time"
-                @click="reserveBook(scope.row.book_id)" circle>
-              </el-button>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="reserveBookDialogVisible = false">Close</el-button>
-      </div>
-    </el-dialog>
-
   </div>
 </template>
 
@@ -338,8 +346,8 @@ ul {
 /* Styles for the profile page */
 .profile-container {
   max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  margin: auto;
+  padding-top: 170px;
 }
 
 .header {
@@ -347,6 +355,14 @@ ul {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  width: 100%;
+  height: 150px;
+  background-color: #dbdbdb80;
+  padding: 40px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  backdrop-filter: blur(10px);
 }
 
 .header h1 {
@@ -453,5 +469,13 @@ ul {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.lightTitle {
+  font-weight: lighter;
+}
+
+.returnBooklist {
+    font-size: large;
 }
 </style>
