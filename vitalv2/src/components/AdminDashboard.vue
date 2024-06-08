@@ -6,7 +6,8 @@
             <div class="user-container">
                 <p v-if="currentAdminId" class="admin-top">Welcome, {{ currentAdminName }}</p>
                 <p v-else class="admin-top">Please login first.</p>
-                <el-button type="danger" class="admin-top logout-btn" v-if="currentAdminId" @click="logout">Logout</el-button>
+                <el-button type="danger" class="admin-top logout-btn" v-if="currentAdminId"
+                    @click="logout">Logout</el-button>
             </div>
         </header>
 
@@ -43,12 +44,19 @@
             <div class="flex-line">
                 <!-- Book Categories Count -->
                 <div class="statistics">
-                    <h3>Book Categories Count</h3>
-                    <ul>
-                        <li v-for="category in bookCategories" :key="category.name">
-                            {{ category.name }}: {{ category.value }}
-                        </li>
-                    </ul>
+                    <h3>Hardware Status</h3>
+                    <h4 class="cpuname">{{ hardware.cpu.model }}</h4>
+                    <div class="info-container">
+                        <div class="info">CPU: {{ hardware.cpu.cores }} Cores</div>
+                        <div class="info-r"> / {{ hardware.cpu.threads }} Threads</div>
+                    </div>
+                    <div class="platform">RAM: {{ hardware.ram_total }} GB</div>
+                    <div class="platform">OS: {{ hardware.system }} {{ hardware.release }}</div>
+                    <div class="platform">OS Version: {{ hardware.version }}</div>
+                    <div class="platform">Architecture: {{ hardware.machine }}</div>
+                    <div class="echarts-line-container">
+                        <div id="chartLine" class="line-wrap"></div>
+                    </div>
                 </div>
 
                 <div class="statistics echarts-box">
@@ -76,13 +84,57 @@ export default {
             totalBooks: 0,
             totalBorrowingRecords: 0,
             totalReservations: 0,
+            cpuUsage: 0.0,
+            ramUsage: 0,
+            hardware: [],
             bookCategories: [],
             chartPie: null,
+            usageLine: null,
             currentAdminId: null,
-            currentAdminName: null
+            currentAdminName: null,
+            intervalId: null
         };
     },
     methods: {
+        async fetchUsage() {
+            axios.get('http://localhost:5000/api/statistics/server')
+                .then(response => {
+                    this.cpuUsage = response.data.cpu_usage;
+                    this.ramUsage = response.data.memory;
+                    this.drawUsage();
+                })
+                .catch(error => {
+                    console.error('Error fetching server status:', error);
+                });
+
+        },
+        startTimer() {
+            // 设置定时器每隔一定时间请求数据
+            this.intervalId = setInterval(this.fetchUsage, 5000); // 每5秒请求一次
+        },
+        drawUsage() {
+            this.usageLine = echarts.init(document.getElementById('chartLine'));
+            this.usageLine.setOption({
+                title: {
+                    text: 'CPU & RAM Usage (%)'
+                },
+                tooltip: {
+                    formatter: "{b}: {c}%",
+                },
+                xAxis: {
+                    type: 'value',
+                    max: 100
+                },
+                yAxis: {
+                    type: 'category',
+                    data: ['CPU', 'RAM']
+                },
+                series: [{
+                    type: 'bar',
+                    data: [this.cpuUsage, this.ramUsage]
+                }]
+            });
+        },
         drawPieChart(bookGraphData) {
             let mytextStyle = {
                 color: "#333",
@@ -151,6 +203,7 @@ export default {
                     this.totalBooks = response.data.total_books;
                     this.totalBorrowingRecords = response.data.total_borrowing_records;
                     this.totalReservations = response.data.total_reservations;
+                    this.hardware = response.data.server_status;
                 })
                 .catch(error => {
                     console.error('Error fetching basic statistics:', error);
@@ -177,6 +230,20 @@ export default {
     },
     mounted() {
         this.fetchData();
+        this.fetchUsage();
+        this.hardware = {
+            "cpu": {
+                "cores": "0",
+                "model": "Intel(R) CPU",
+                "threads": 0
+            },
+            "machine": "AMD64",
+            "platform": "Windows",
+            "release": "10",
+            "system": "Windows",
+            "version": "10"
+        }
+        this.startTimer();
     }
 };
 </script>
@@ -247,7 +314,8 @@ export default {
     transition-duration: 0.2s;
 }
 
-.status-card:hover, .statistics:hover {
+.status-card:hover,
+.statistics:hover {
     background-color: #eaeaea;
 }
 
@@ -292,5 +360,24 @@ export default {
 
 .logout-btn {
     margin-left: 20px;
+}
+
+.info-container {
+    display: flex;
+}
+
+.info-r {
+    margin-left: 5px
+}
+
+.echarts-line-container {
+    width: 100%;
+    height: 200px;
+    margin-top: 20px
+}
+
+.line-wrap {
+    width: 100%;
+    height: 200px
 }
 </style>

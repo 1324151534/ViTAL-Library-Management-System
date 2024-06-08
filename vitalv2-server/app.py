@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from datetime import datetime, timedelta
+import platform, os, psutil
 
 app = Flask(__name__, static_folder='covers')
 app.config.from_object(Config)
@@ -111,6 +112,37 @@ class Reservations(db.Model):
 # 创建数据库和表
 with app.app_context():
     db.create_all()
+    
+# 获取操作系统详细信息
+def get_system_info():
+    ram_total = round(psutil.virtual_memory().total / 1024**3, 2)
+    system_info = {
+        'system': platform.system(),
+        'release': platform.release(),
+        'version': platform.version(),
+        'machine': platform.machine(),
+        'cpu': get_cpu(),
+        'platform': platform.platform(),
+        'ram_total' : ram_total
+    }
+    return system_info
+    
+def get_cpu():
+    model = None
+    try:
+        cmd = "wmic path win32_processor get name"
+        cmd_cores = "wmic path win32_processor get NumberOfCores"
+        model = os.popen(cmd).read().replace("\n", '').replace("Name", '').replace('                                       ', '').replace('  ','')
+        cores = os.popen(cmd_cores).read().replace("\n", '').replace("NumberOfCores", '').replace(' ', '')
+        threads = os.cpu_count()
+        return {
+            'model': model,
+            'cores': cores,
+            'threads': threads
+        }
+    except Exception as e:
+        print("Error while retrieving CPU model:", e)
+        return None
 
 # 用户注册
 @app.route('/register', methods=['POST'])
@@ -672,10 +704,26 @@ def get_statistics():
     # Fetch total reservations count
     total_reservations = Reservations.query.count()
     
+    server_status = get_system_info()
+    
     return jsonify({
         'total_books': total_quantity,
         'total_borrowing_records': total_borrowing_records,
-        'total_reservations': total_reservations
+        'total_reservations': total_reservations,
+        'server_status': server_status
+    }), 200
+    
+@app.route('/api/statistics/server', methods=['GET'])
+def get_server_statistics():
+    
+    data = psutil.virtual_memory()
+    memory = int(round(data.percent))
+    percpu = psutil.cpu_percent(interval=2, percpu=True)
+    cpu_usage = percpu[0]
+    
+    return jsonify({
+        'cpu_usage': cpu_usage,
+        'memory': memory
     }), 200
 
 # 获取不同类型书籍的总数量

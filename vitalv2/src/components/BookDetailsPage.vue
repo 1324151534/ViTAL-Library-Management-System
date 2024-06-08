@@ -278,7 +278,7 @@ export default {
     transition-duration: 0.2s;
     cursor: pointer;
     flex: 1;
-    max-width: 25%;
+    max-width: 28%;
 }
 
 .recommendations .book-item:hover {
