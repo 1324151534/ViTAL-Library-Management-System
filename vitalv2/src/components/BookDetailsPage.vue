@@ -23,7 +23,7 @@
                 <div class="image">
                     <img :src="book.cover_image" alt="Book Cover">
                     <el-button style="margin-top: 20px;" type="primary" icon="el-icon-circle-plus"
-                        @click="addToBorrowingList">Add to Borrowing List</el-button>
+                        @click="addToBorrowingList" :disabled="buttonDisable">Add to Borrowing List</el-button>
                 </div>
 
                 <div class="info">
@@ -68,7 +68,8 @@ export default {
             currentUser: null,
             book: {}, // 存储书籍详细信息
             recommendations: [], // 存储推荐书籍
-            recommendNotiText: 'Recommended Books'
+            recommendNotiText: 'Recommended Books',
+            buttonDisable: false
         };
     },
     methods: {
@@ -124,6 +125,7 @@ export default {
                     .then(() => {
                         // 在页面上显示成功消息
                         this.$message.success('Book added to Borrowing List successfully');
+                        this.buttonDisable = true;
                     })
                     .catch((res) => {
                         // 在页面上显示错误消息
