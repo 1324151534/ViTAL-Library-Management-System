@@ -228,6 +228,9 @@ export default {
             this.$message.info('Logged Out.');
         }
     },
+    beforeDestroy() {
+        clearInterval(this.intervalId);
+    },
     mounted() {
         this.fetchData();
         this.fetchUsage();

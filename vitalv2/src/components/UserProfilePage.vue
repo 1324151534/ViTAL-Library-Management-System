@@ -276,7 +276,7 @@ export default {
         }
         const response = await axios.get(`http://localhost:5000/api/user_borrowing_records/${userId}`);
         this.borrowingRecords = response.data;
-        console.log(this.borrowingRecords)
+        
       } catch (error) {
         console.error('Error fetching borrowing records:', error);
       }
