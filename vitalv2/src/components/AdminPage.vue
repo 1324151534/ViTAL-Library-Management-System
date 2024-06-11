@@ -83,7 +83,7 @@
         </div>
 
         <!-- Edit Book Dialog -->
-        <el-dialog title="Edit Book" :visible.sync="editBookDialogVisible">
+        <el-dialog title="Edit Book" :visible.sync="editBookDialogVisible" width="75%">
             <el-form :model="editBookForm">
                 <el-form-item label="Title">
                     <el-input v-model="editBookForm.title"></el-input>
@@ -121,7 +121,7 @@
         </el-dialog>
 
         <!-- Add Book Dialog -->
-        <el-dialog title="Add Book" :visible.sync="addBookDialogVisible">
+        <el-dialog title="Add Book" :visible.sync="addBookDialogVisible" width="75%">
             <el-form :model="newBookForm">
                 <el-form-item label="Title">
                     <el-input v-model="newBookForm.title"></el-input>
@@ -133,7 +133,10 @@
                     <el-input v-model="newBookForm.quantity" type="number"></el-input>
                 </el-form-item>
                 <el-form-item label="ISBN">
-                    <el-input v-model="newBookForm.isbn"></el-input>
+                    <div class="formBox" style="width: 100%; display: flex; justify-content: space-around;">
+                        <el-input v-model="newBookForm.isbn" style="width: 68%"></el-input>
+                        <el-button type="primary" @click="getBookInfo" style="width: 30%">Get Information</el-button>
+                    </div>
                 </el-form-item>
                 <el-form-item label="Type">
                     <el-input v-model="newBookForm.type"></el-input>
@@ -149,7 +152,7 @@
                 </el-form-item>
                 <el-form-item label="Published Date">
                     <el-date-picker v-model="newBookForm.published_date" type="date"
-                        placeholder="Select date"></el-date-picker>
+                        placeholder="Select date" value-format="timestamp"></el-date-picker>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -315,6 +318,17 @@ export default {
     methods: {
         handleRowClick(row) {
             this.sendNotificationForm.user_id = row.id;
+        },
+        async getBookInfo() {
+            const response = await axios.get(`https://apis.5share.site/books/?isbn=${this.newBookForm.isbn}`);
+            console.log(response);
+            const book_data = response.data.info;
+            this.newBookForm.title = book_data.name;
+            this.newBookForm.author = book_data.authors;
+            this.newBookForm.type = book_data.categories;
+            this.newBookForm.description = book_data.description;
+            this.newBookForm.published_date = new Date(book_data.publishedDate + " 00:00:00");
+            this.newBookForm.cover_image = this.newBookForm.cover_image == '' ? "http://localhost:5000/covers/blank.jpg" : this.newBookForm.cover_image;
         },
         async fetchBooks() {
             const adminUsername = localStorage.getItem('currentAdminUsername');

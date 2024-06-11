@@ -164,7 +164,7 @@
       </el-dialog>
 
       <!-- Checkout Dialog -->
-      <el-dialog title="Check-out" :visible.sync="checkoutDialogVisible">
+      <el-dialog title="Check-out" :visible.sync="checkoutDialogVisible" width="75%">
         <div class="check-container">
           <div class="check-container-left">
             <div class="check-bookname">{{ now_checking_book }}</div>
@@ -254,7 +254,7 @@ export default {
       this.remain_days = Math.floor(diffRetDate / (1000 * 3600 * 24));
 
       this.checkoutDialogVisible = true;
-      this.fee = Math.max(0.3, 0.2 * (this.diff_days / 7));
+      this.fee = Math.floor(this.diff_days / 30);
     },
     switch_payment() {
       if (this.payment_text == 'Use Wechat Pay') {

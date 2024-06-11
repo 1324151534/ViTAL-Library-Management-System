@@ -389,7 +389,7 @@ def create_borrowing_record():
     
     book = Books.query.get(book_id)
     book_title = book.title
-    if book and book.quantity > 1:
+    if book and book.quantity >= 1:
         new_record = BorrowingRecord(
             user_id=user_id,
             book_id=book_id,
